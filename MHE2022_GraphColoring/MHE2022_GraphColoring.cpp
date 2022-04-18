@@ -1,20 +1,115 @@
 // MHE2022_GraphColoring.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
+#include <vector>
+#include <map>
+#include <string>
 #include <iostream>
 
-int main()
+#define vertCount 7
+#define edgeCount 12
+#define colorCount 3
+#define randSeed 16462
+
+using namespace std;
+
+class Vert 
 {
-    std::cout << "Hello World!\n";
+    public:
+        int idx, color;
+        vector<int> adjacentIndices;
+
+        void SetAdjacent(int index) {
+            adjacentIndices.push_back(index);
+        }
+
+        Vert(int index, int Color) {
+            idx = index;
+            color = Color;
+        }
+};
+
+vector<Vert> GenVertices()
+{
+    vector<Vert> vertices;
+    int randColor;
+    for (int i = 0; i < vertCount; i++) {
+        randColor = rand() % colorCount + 1;
+        Vert currentVertex(i, randColor);
+        vertices.push_back(currentVertex); //add to the end of list
+    }
+    return vertices;
+};
+
+void GenRandomGraph() {
+
+    /*
+        - Ka¿dy wierzcho³ek musi mieæ conajmniej jedn¹ krawêdŸ = obs³uga wyizolowanych wierzcho³ków
+        - Nie mo¿e byæ duplikatów krawêdzi.
+
+        Wsparcie: https://www.tutorialspoint.com/cplusplus-program-to-create-a-random-graph-using-random-edge-generation
+    */
+
+    int edges[edgeCount][2]; //wartoœæ to wierzcho³ek, pierwszy wymiar to index edga, drugi to pierwszy lub drugi vert w edgu (bo edge ma dwa wierzcho³ki)
+    int i = 0, count = 0;
+
+    while(i < edgeCount){
+    //for (int i = 0; i < edgeCount; i++) { // chcia³em zrobiæ wersjê z forem zamiast while, ale z jakiegoœ powodu nie dzia³a tak samo... no idea why.
+
+        edges[i][0] = rand() % vertCount;
+        edges[i][1] = rand() % vertCount;
+
+        if (edges[i][0] == edges[i][1]){ // jeœli oba koñce edga nie s¹ tym samym wierzcho³kiem
+            //cout << "[" << i << "] " << " - (" << edges[i][0] << ") --- (" << edges[i][1] << ")\n"; //bad edges
+            continue;
+        }
+        else
+        {
+            for (int j = 0; j < i; j++) {
+                if ((edges[i][0] == edges[j][0] && edges[i][1] == edges[j][1])
+                  ||(edges[i][0] == edges[j][1] && edges[i][1] == edges[j][0]))
+                    i--;
+            }
+        }
+        i++;
+    }
+
+    cout << "### Adjacent vertices ### " << endl;
+    for (int i = 0; i < vertCount; i++) {
+        count = 0;
+        cout << i << " adj to = { ";
+
+        for (int j = 0; j < edgeCount; j++) {
+            if (edges[j][0] == i) //jeœli pierwszy vert edga, to wypisz drugi vert edga
+            {
+                cout << edges[j][1] << " ";
+                count++;
+            }else if (edges[j][1] == i) //a jeœli drugi vert edga, to wypisz pierwszy vert edga
+            {
+                cout << edges[j][0] << " ";
+                count++;
+            }
+            else if (j == edgeCount-1 && count == 0) { // wypisz na koñcu pêtli, gdy nie wszed³ w ¿adnego ifa
+                cout << "Isolated "; //Print “Isolated vertex” for the vertex having no degree.
+            }
+        }
+        cout << "}\n";
+    }
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
+int main(int argc, char** argv)
+{
+    srand(randSeed); //seeding random number generator
+    vector<Vert> vertices = GenVertices();
+    
+    cout << "vertices.size() = " << vertices.size() << endl << endl;
 
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+    for (int i = 0; i < vertices.size(); i++) {
+        cout << "Vert (" << vertices[i].idx << ", " << vertices[i].color << ")\n";
+    }
+    cout << endl << endl;
+
+    GenRandomGraph();
+
+    return 0;
+}
