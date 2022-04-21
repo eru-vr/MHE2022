@@ -1,38 +1,65 @@
-// MHE2022_GraphColoring.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+/*
+    Projekt na zajêcia MHE 2022 PJATK
+    Temat: Graph Coloring
+    Autor: Jaromir Daruk 
+    Index: s16462
+
+*/
+
+/*
+    Parametry na których bêdzie oparty graf i generowanie rozwi¹zañ dla niego.
+    TODO: Przerobienie na wprowadzanie tych zmiennych poprzez argumenty z linii poleceñ.
+
+    #define vertCount 5
+    #define edgeCount 6
+    #define colorCount 3
+    #define randSeed 16462
+    https://csacademy.com/app/graph_editor/
+ */
 
 #include <vector>
 #include <map>
 #include <string>
 #include <iostream>
 
-#define vertCount 7
-#define edgeCount 12
+#define vertCount 5
+#define edgeCount 6
 #define colorCount 3
 #define randSeed 16462
 
 using namespace std;
 
-class Vert 
-{
-    public:
-        int idx, color;
+class Vert {
+
+    private:
+        int idx, cr;
         vector<int> adjacentIndices;
 
-        void SetAdjacent(int index) {
-            adjacentIndices.push_back(index);
+    public:
+        int GetIndex() { return idx; }
+
+        int GetColor() { return cr; }
+        void SetColor(int color) { cr = color; }
+
+        vector<int> GetAdjacent() { return adjacentIndices; }
+               void SetAdjacent(int color) { adjacentIndices.push_back(color); }
+
+        void PrintAdjacent() {
+            for (auto adj : adjacentIndices) {
+                cout << adj << " ";
+            }
         }
 
-        Vert(int index, int Color) {
+        Vert(int index, int color) {
             idx = index;
-            color = Color;
+            cr = color;
         }
 };
 
-vector<Vert> GenVertices()
-{
+vector<Vert> GenVertices(){
     vector<Vert> vertices;
     int randColor;
+
     for (int i = 0; i < vertCount; i++) {
         randColor = rand() % colorCount + 1;
         Vert currentVertex(i, randColor);
@@ -41,8 +68,7 @@ vector<Vert> GenVertices()
     return vertices;
 };
 
-void GenRandomGraph() {
-
+void GenRandomGraph(vector<Vert> &vertices) {
     /*
         - Ka¿dy wierzcho³ek musi mieæ conajmniej jedn¹ krawêdŸ = obs³uga wyizolowanych wierzcho³ków
         - Nie mo¿e byæ duplikatów krawêdzi.
@@ -53,6 +79,7 @@ void GenRandomGraph() {
     int edges[edgeCount][2]; //wartoœæ to wierzcho³ek, pierwszy wymiar to index edga, drugi to pierwszy lub drugi vert w edgu (bo edge ma dwa wierzcho³ki)
     int i = 0, count = 0;
 
+    cout << "Generating graph...\n";
     while(i < edgeCount){
     //for (int i = 0; i < edgeCount; i++) { // chcia³em zrobiæ wersjê z forem zamiast while, ale z jakiegoœ powodu nie dzia³a tak samo... no idea why.
 
@@ -74,42 +101,41 @@ void GenRandomGraph() {
         i++;
     }
 
-    cout << "### Adjacent vertices ### " << endl;
     for (int i = 0; i < vertCount; i++) {
+        
         count = 0;
-        cout << i << " adj to = { ";
-
         for (int j = 0; j < edgeCount; j++) {
-            if (edges[j][0] == i) //jeœli pierwszy vert edga, to wypisz drugi vert edga
-            {
-                cout << edges[j][1] << " ";
+            if (edges[j][0] == i){ //jeœli pierwszy vert edga, to wypisz drugi vert edga
+                vertices[i].SetAdjacent(edges[j][1]);
                 count++;
-            }else if (edges[j][1] == i) //a jeœli drugi vert edga, to wypisz pierwszy vert edga
-            {
-                cout << edges[j][0] << " ";
+            }else if (edges[j][1] == i){ //a jeœli drugi vert edga, to wypisz pierwszy vert edga
+                vertices[i].SetAdjacent(edges[j][0]);
                 count++;
             }
             else if (j == edgeCount-1 && count == 0) { // wypisz na koñcu pêtli, gdy nie wszed³ w ¿adnego ifa
                 cout << "Isolated "; //Print “Isolated vertex” for the vertex having no degree.
             }
         }
+    }
+}
+
+void PrintVertexInfo(vector<Vert> vertices) {
+    cout << "Vertex count = " << vertices.size() << "\n";
+    cout << "Vertex list: \n\n";
+    for (int i = 0; i < vertices.size(); i++) {
+        cout << "(" << vertices[i].GetIndex() << ") | col = (" << vertices[i].GetColor() << ") | adjacent = { ";
+        vertices[i].PrintAdjacent();
         cout << "}\n";
     }
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv){
     srand(randSeed); //seeding random number generator
+
     vector<Vert> vertices = GenVertices();
-    
-    cout << "vertices.size() = " << vertices.size() << endl << endl;
 
-    for (int i = 0; i < vertices.size(); i++) {
-        cout << "Vert (" << vertices[i].idx << ", " << vertices[i].color << ")\n";
-    }
-    cout << endl << endl;
-
-    GenRandomGraph();
+    GenRandomGraph(vertices);
+    PrintVertexInfo(vertices);
 
     return 0;
 }
