@@ -59,7 +59,7 @@ class Vert {
 vector<Vert> GenVertices(){
     vector<Vert> vertices;
     int randColor;
-
+    cout << "Generating vertex list...\n";
     for (int i = 0; i < vertCount; i++) {
         randColor = rand() % colorCount + 1;
         Vert currentVertex(i, randColor);
@@ -119,9 +119,19 @@ void GenRandomGraph(vector<Vert> &vertices) {
     }
 }
 
-void PrintVertexInfo(vector<Vert> vertices) {
+void GraphColoring(vector<Vert> &vertices) {
+    vertices[0].SetColor(1);
+    for (int i = 1; i < vertices.size(); i++) {
+        for (auto adj : vertices[i].GetAdjacent()) {
+            vertices[adj].GetColor();
+        }
+        vertices[i].SetColor(1 % colorCount);
+    }
+}
+
+void PrintVertexInfo(vector<Vert> &vertices) {
     cout << "Vertex count = " << vertices.size() << "\n";
-    cout << "Vertex list: \n\n";
+    cout << "Vertex list: \n";
     for (int i = 0; i < vertices.size(); i++) {
         cout << "(" << vertices[i].GetIndex() << ") | col = (" << vertices[i].GetColor() << ") | adjacent = { ";
         vertices[i].PrintAdjacent();
