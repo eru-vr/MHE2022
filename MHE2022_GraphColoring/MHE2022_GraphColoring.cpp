@@ -1,14 +1,14 @@
-/*
-    Projekt na zajêcia MHE 2022 PJATK
+ï»¿/*
+    Projekt na zajï¿½cia MHE 2022 PJATK
     Temat: Graph Coloring
-    Autor: Jaromir Daruk 
+    Autor: Jaromir Daruk
     Index: s16462
 
 */
 
 /*
-    Parametry na których bêdzie oparty graf i generowanie rozwi¹zañ dla niego.
-    TODO: Przerobienie na wprowadzanie tych zmiennych poprzez argumenty z linii poleceñ.
+    Parametry na ktï¿½rych bï¿½dzie oparty graf i generowanie rozwiï¿½zaï¿½ dla niego.
+    TODO: Przerobienie na wprowadzanie tych zmiennych poprzez argumenty z linii poleceï¿½.
 
     #define vertCount 5
     #define edgeCount 6
@@ -21,72 +21,78 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <algorithm>
+#include <iterator>
+#include <sstream>
+#include <tuple>
 
-#define vertCount 5
-#define edgeCount 6
-#define colorCount 3
+#define vertCount 6
+#define edgeCount 7
+#define colorCount 4
 #define randSeed 16462
 
 using namespace std;
 
 class Vert {
 
-    private:
-        int idx, cr;
-        vector<int> adjacentIndices;
+private:
+    int idx, cr;
+    string stringColor;
+    vector<int> adjacentIndices;
 
-    public:
-        int GetIndex() { return idx; }
+public:
+    int GetIndex() { return idx; }
 
-        int GetColor() { return cr; }
-        void SetColor(int color) { cr = color; }
+    int GetColor() { return cr; }
+    void SetColor(int color) { cr = color; }
 
-        vector<int> GetAdjacent() { return adjacentIndices; }
-               void SetAdjacent(int color) { adjacentIndices.push_back(color); }
+    string GetStringColor() { return stringColor; }
+    void SetStringColor(string strColor) { stringColor = strColor; }
 
-        void PrintAdjacent() {
-            for (auto adj : adjacentIndices) {
-                cout << adj << " ";
-            }
+    vector<int> GetAdjacent() { return adjacentIndices; }
+    void SetAdjacent(int color) { adjacentIndices.push_back(color); }
+
+    void PrintAdjacent() {
+        for (auto adj : adjacentIndices) {
+            cout << adj << " ";
         }
+    }
 
-        Vert(int index, int color) {
-            idx = index;
-            cr = color;
-        }
+    Vert(int index, int color) {
+        idx = index;
+        cr = color;
+    }
 };
 
-vector<Vert> GenVertices(){
+vector<Vert> GenVertices() {
     vector<Vert> vertices;
-    int randColor;
     cout << "Generating vertex list...\n";
     for (int i = 0; i < vertCount; i++) {
-        randColor = rand() % colorCount + 1;
-        Vert currentVertex(i, randColor);
+        Vert currentVertex(i, 0);
         vertices.push_back(currentVertex); //add to the end of list
     }
     return vertices;
 };
 
-void GenRandomGraph(vector<Vert> &vertices) {
+void GenRandomGraph(vector<Vert>& vertices) {
     /*
-        - Ka¿dy wierzcho³ek musi mieæ conajmniej jedn¹ krawêdŸ = obs³uga wyizolowanych wierzcho³ków
-        - Nie mo¿e byæ duplikatów krawêdzi.
+        - Kaï¿½dy wierzchoï¿½ek musi mieï¿½ conajmniej jednï¿½ krawï¿½dï¿½ = obsï¿½uga wyizolowanych wierzchoï¿½kï¿½w
+        - Nie moï¿½e byï¿½ duplikatï¿½w krawï¿½dzi.
 
         Wsparcie: https://www.tutorialspoint.com/cplusplus-program-to-create-a-random-graph-using-random-edge-generation
     */
 
-    int edges[edgeCount][2]; //wartoœæ to wierzcho³ek, pierwszy wymiar to index edga, drugi to pierwszy lub drugi vert w edgu (bo edge ma dwa wierzcho³ki)
+    int edges[edgeCount][2]; //wartoï¿½ï¿½ to wierzchoï¿½ek, pierwszy wymiar to index edga, drugi to pierwszy lub drugi vert w edgu (bo edge ma dwa wierzchoï¿½ki)
     int i = 0, count = 0;
 
     cout << "Generating graph...\n";
-    while(i < edgeCount){
-    //for (int i = 0; i < edgeCount; i++) { // chcia³em zrobiæ wersjê z forem zamiast while, ale z jakiegoœ powodu nie dzia³a tak samo... no idea why.
+    while (i < edgeCount) {
+        //for (int i = 0; i < edgeCount; i++) { // chciaï¿½em zrobiï¿½ wersjï¿½ z forem zamiast while, ale z jakiegoï¿½ powodu nie dziaï¿½a tak samo... no idea why.
 
         edges[i][0] = rand() % vertCount;
         edges[i][1] = rand() % vertCount;
 
-        if (edges[i][0] == edges[i][1]){ // jeœli oba koñce edga nie s¹ tym samym wierzcho³kiem
+        if (edges[i][0] == edges[i][1]) { // jeï¿½li oba koï¿½ce edga nie sï¿½ tym samym wierzchoï¿½kiem
             //cout << "[" << i << "] " << " - (" << edges[i][0] << ") --- (" << edges[i][1] << ")\n"; //bad edges
             continue;
         }
@@ -94,7 +100,7 @@ void GenRandomGraph(vector<Vert> &vertices) {
         {
             for (int j = 0; j < i; j++) {
                 if ((edges[i][0] == edges[j][0] && edges[i][1] == edges[j][1])
-                  ||(edges[i][0] == edges[j][1] && edges[i][1] == edges[j][0]))
+                    || (edges[i][0] == edges[j][1] && edges[i][1] == edges[j][0]))
                     i--;
             }
         }
@@ -102,36 +108,65 @@ void GenRandomGraph(vector<Vert> &vertices) {
     }
 
     for (int i = 0; i < vertCount; i++) {
-        
+
         count = 0;
         for (int j = 0; j < edgeCount; j++) {
-            if (edges[j][0] == i){ //jeœli pierwszy vert edga, to wypisz drugi vert edga
+            if (edges[j][0] == i) { //jeï¿½li pierwszy vert edga, to wypisz drugi vert edga
                 vertices[i].SetAdjacent(edges[j][1]);
                 count++;
-            }else if (edges[j][1] == i){ //a jeœli drugi vert edga, to wypisz pierwszy vert edga
+            }
+            else if (edges[j][1] == i) { //a jeï¿½li drugi vert edga, to wypisz pierwszy vert edga
                 vertices[i].SetAdjacent(edges[j][0]);
                 count++;
             }
-            else if (j == edgeCount-1 && count == 0) { // wypisz na koñcu pêtli, gdy nie wszed³ w ¿adnego ifa
-                cout << "Isolated "; //Print “Isolated vertex” for the vertex having no degree.
+            else if (j == edgeCount - 1 && count == 0) { // wypisz na koï¿½cu pï¿½tli, gdy nie wszedï¿½ w ï¿½adnego ifa
+                cout << "Isolated "; //Print ï¿½Isolated vertexï¿½ for the vertex having no degree.
             }
         }
     }
 }
 
-void GraphColoring(vector<Vert> &vertices) {
-    vertices[0].SetColor(1);
+void GraphColoring(vector<Vert>& vertices, bool showInfo) {
+    cout << "Coloring graph...\n";
+
+    vertices[0].SetColor(1); //first vert is always color 1
     for (int i = 1; i < vertices.size(); i++) {
-        for (auto adj : vertices[i].GetAdjacent()) {
-            vertices[adj].GetColor();
+        if (showInfo) {
+            cout << "\n### GRAPH COLORING ###\n";
+            cout << "\nColored Vert [" << i << "]" << endl;
+            cout << "\nAvailable colors: " << endl;
         }
-        vertices[i].SetColor(1 % colorCount);
+
+        vector<int> notAllowedColors;
+
+        for (auto adj : vertices[i].GetAdjacent()) {
+            int adjColor = vertices[adj].GetColor();
+            if (adjColor != 0) {
+                notAllowedColors.push_back(adjColor);
+                if (showInfo) { cout << "Adj (" << vertices[adj].GetIndex() << ") - Not allowed color = " << adjColor << endl; }
+            }
+        }
+
+        vector<int> allowedColors(colorCount);
+        for (int i = 0; i < colorCount; i++) {
+            if (find(notAllowedColors.begin(), notAllowedColors.end(), i + 1) == notAllowedColors.end()) {
+                allowedColors[i] = i + 1;
+                if (showInfo) { cout << "Allowed color = " << allowedColors[i] << endl; }
+            }
+        }
+        allowedColors.erase(remove(allowedColors.begin(), allowedColors.end(), 0), allowedColors.end());
+        int minColor = *min_element(allowedColors.begin(), allowedColors.end());
+        vertices[i].SetColor(minColor);
+        if (showInfo) { cout << "Color set to  = " << minColor << endl; }
     }
 }
 
-void PrintVertexInfo(vector<Vert> &vertices) {
-    cout << "Vertex count = " << vertices.size() << "\n";
+void PrintVertexInfo(vector<Vert>& vertices) {
+    cout << "\n### VERTEX INFO ###\n";
+    cout << "Vertex count = " << vertices.size() << endl;
+    cout << "Available colors = " << colorCount << endl;
     cout << "Vertex list: \n";
+
     for (int i = 0; i < vertices.size(); i++) {
         cout << "(" << vertices[i].GetIndex() << ") | col = (" << vertices[i].GetColor() << ") | adjacent = { ";
         vertices[i].PrintAdjacent();
@@ -139,13 +174,76 @@ void PrintVertexInfo(vector<Vert> &vertices) {
     }
 }
 
-int main(int argc, char** argv){
+string vis(vector<Vert> vertices) {
+    using namespace std;
+    /*
+        graph G {
+    0 [style=filled fillcolor=red]
+    1 [style=filled fillcolor=red]
+    2 [style=filled fillcolor=blue]
+    3 [style=filled fillcolor=green]
+    4 [style=filled fillcolor=blue]
+    5 [style=filled fillcolor=red]
+
+    0--5
+
+    1--4
+    1--3
+    1--2
+
+    2--3
+    2--1
+
+    3--2
+    3--5
+    3--1
+
+    4--5
+    4--1
+
+    5--4
+    5--3
+    5--0
+    }
+    */
+    stringstream out;
+    out << "graph G {" << endl;
+    int num = 0;
+    for (auto vert : vertices) {
+        out << vert.GetIndex() << " [ style = filled fillcolor = " << vert.GetColor() << "] " << endl;
+        num++;
+    }
+
+    for (auto vert : vertices) {
+        for (auto adj : vert.GetAdjacent()) {
+            out << vert.GetIndex() << " -- " << adj << endl;
+        }
+    }
+
+    out << "}" << endl;
+    return out.str();
+}
+
+tuple<int, string> ConvertVertIdColorToString(int id) {
+    vector<string> stringColors;
+    if (id == 1) return make_tuple(1, "red");
+    if (id == 2) return make_tuple(2, "green");
+    if (id == 3) return make_tuple(3, "blue");
+    if (id == 4) return make_tuple(4, "yellow");
+    if (id == 5) return make_tuple(5, "cyan");
+    //throw std::invalid_argument("id");
+}
+
+int main(int argc, char** argv) {
     srand(randSeed); //seeding random number generator
 
     vector<Vert> vertices = GenVertices();
 
     GenRandomGraph(vertices);
+    GraphColoring(vertices, false);
     PrintVertexInfo(vertices);
+
+    //cout<<vis(vertices);
 
     return 0;
 }
