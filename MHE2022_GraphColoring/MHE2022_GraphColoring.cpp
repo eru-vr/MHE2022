@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <iterator>
 #include <sstream>
-#include <tuple>
+#include <random>
 
 using namespace std;
 
@@ -29,12 +29,12 @@ class Graph {
     private:
         class Vert {
         private:
-            int idx, colorIndex;
+            int index, colorIndex;
             string hexColor;
             vector<int> adjacentIndices;
 
         public:
-            int GetIndex() { return idx; }
+            int GetIndex() { return index; }
             int GetColorIndex() { return colorIndex; }
             void SetColor(int color) {
                 colorIndex = color; 
@@ -57,8 +57,8 @@ class Graph {
             }
 
             string GetHexColor() { return hexColor; }
+            void SetAdjacent(int index) { adjacentIndices.push_back(index); }
             vector<int> GetAdjacent() { return adjacentIndices; }
-            void SetAdjacent(int color) { adjacentIndices.push_back(color); }
 
             void PrintAdjacent() {
                 for (auto adj : adjacentIndices) {
@@ -66,22 +66,26 @@ class Graph {
                 }
             }
 
-            Vert(int index, int color) {
-                idx = index;
-                colorIndex = color;
+            Vert(int idx) {
+                index = idx;
+                SetColor(0);
             }
         };
      
     public:
         vector<Vert> vertices;
-        int vertCount, edgeCount, colorCount, isolatedCount, notColoredCount, badEdgesCount, score;
+        int vertCount, edgeCount, colorCount, isolatedCount, coloredCount, badEdgesCount, score;
 
         void PrintStatistics() {
             cout << "Graph has " << vertCount << " vertices.\n";
             cout << "Graph has " << edgeCount << " edges.\n";
-            cout << "Graph has maximum " << colorCount << " available colors.\n";
             cout << "Graph has " << isolatedCount << " isolated vertices.\n";
-            cout << "Graph has " << notColoredCount << " not colored vertices.\n";
+            for (int i = 0; i < vertices.size(); i++) {
+                if (vertices[i].GetColorIndex() != 0) {
+                    coloredCount++;
+                }
+            }
+            cout << "Graph has " << coloredCount << " colored vertices.\n";
             cout << "Graph has " << badEdgesCount << " edges that are connected to single vertex.\n";
         }
 
@@ -89,7 +93,7 @@ class Graph {
             vector<Vert> vertices;
             cout << "Generating vertex list...\n";
             for (int i = 0; i < vertCount; i++) {
-                Vert currentVertex(i, 0);
+                Vert currentVertex(i);
                 vertices.push_back(currentVertex); //add to the end of list
             }
             return vertices;
@@ -105,17 +109,20 @@ class Graph {
             */
             vector<vector<int>> edges(edgeCount, vector<int>(2));
             int i = 0, count = 0;
+            random_device rd;
+            mt19937 gen(rd());
+            uniform_int_distribution<> dis1(0, vertCount);
+            uniform_int_distribution<> dis2(0, vertCount);
 
             cout << "Generating graph...\n";
             while (i < edgeCount) {
                 //for (int i = 0; i < edgeCount; i++) { // chcialem zrobic wersje z forem zamiast while, ale z jakiegos powodu nie dziala tak samo... no idea why.
 
-                edges.at(i).at(0) = rand() % vertCount;
-                edges.at(i).at(1) = rand() % vertCount;
+                edges.at(i).at(0) = dis1(gen);
+                edges.at(i).at(1) = dis2(gen);
 
 
                 if (edges.at(i).at(0) == edges.at(i).at(1)) { // jesli oba konce edga nie sa tym samym wierzcholku
-                    //cout << "Two ends of single edge are connected to single edge";
                     badEdgesCount++;
                     continue;
                 }
@@ -131,14 +138,20 @@ class Graph {
             }
 
             for (int i = 0; i < vertCount; i++) {
-
                 count = 0;
                 for (int j = 0; j < edgeCount; j++) {
+                    if (edges.at(j).at(0) == vertCount || edges.at(j).at(1) == vertCount) { 
+                        /*z jakiegoś powodu znajduje sąsiada z indexem o całkowiej liczby vertów, gdzie indexy są w zakresie o jeden mniej
+                        przez co się wysypuje, stąd obsługa takiego przypadku  */
+                        continue;
+                    }
                     if (edges.at(j).at(0) == i) { //jezli pierwszy vert edga, to wypisz drugi vert edga
+  
                         vertices[i].SetAdjacent(edges.at(j).at(1));
                         count++;
                     }
                     else if (edges.at(j).at(1) == i) { //a jezli drugi vert edga, to wypisz pierwszy vert edga
+
                         vertices[i].SetAdjacent(edges.at(j).at(0));
                         count++;
                     }
@@ -186,7 +199,7 @@ class Graph {
                 if (notAllowedColorsCount == allowedColors.size()) {
                     vertices[i].SetColor(0);
                     canColor = false;
-                    notColoredCount++;
+                    coloredCount++;
                     if (showInfo) { cout << "Can't color, not enough colors" << endl; }
                 }
                 else {
@@ -201,7 +214,6 @@ class Graph {
                 }
             }
         }
-
         void GraphVizToFile() {
             /*
                 graph G {
@@ -257,7 +269,7 @@ class Graph {
 
         int EvauluateGraph() {
             score = 0;
-            score = score + notColoredCount*5 + badEdgesCount*2;
+            score = score + coloredCount*5 + badEdgesCount*2;
             cout << "Graph score = " << score <<endl;
             return score;
         }
@@ -270,36 +282,68 @@ class Graph {
             }
         }
 
-
-        Graph(int vertcount, int edgecount, int colorcount) {
+        Graph(int vertcount, int edgecount) {
             vertCount = vertcount;
             edgeCount = edgecount;
-            colorCount = colorcount;
-
             vertices = GenerateVertices();
             GenerateGraph();
         }
 };
 
-void GreatestFunction(Graph myGraph, int iterations) {
-    int colorCountOffset = myGraph.colorCount;
-    for (int i = 0; i < iterations; i++) {
-        myGraph.colorCount = colorCountOffset;
-        myGraph.GraphColoring(false);
-        myGraph.PrintStatistics();
-        myGraph.EvauluateGraph();
-        myGraph.GraphVizToFile();
-        colorCountOffset++;
-        cout << endl;
-    }
-}
+class Colorizer {
+    public:
+        int colorCount;
+
+        void Colorize(Graph &graph, bool showInfo) {
+            random_device rd;
+            mt19937 gen(rd());
+            uniform_int_distribution<> dis(1, 2);
+            cout << "Coloring...\n";
+            for (int i = 0; i < graph.vertices.size(); i++) {
+                int color = dis(gen);
+                graph.vertices[i].SetColor(color);
+                if (showInfo) {
+                    cout << "Vert [" << i << "] = " << color << endl;
+                }
+            }
+        }
+
+        Colorizer(Graph& graph) {
+            colorCount = graph.vertices.size();
+        }
+
+        int Evaluate(Graph& graph) {
+            int score = 0;
+            for (int i = 0; i < graph.vertices.size(); i++) {
+               //cout << "\nvert = " << graph.vertices[i].GetIndex() << endl;
+                //graph.vertices[i].PrintAdjacent();
+                for (auto adj : graph.vertices[i].GetAdjacent()) {
+                    //cout << "adj idx = " << adj << endl;
+                    int adjColor = graph.vertices[adj].GetColorIndex();
+                    if (graph.vertices[i].GetColorIndex() == adjColor)
+                    {
+                        score++;
+                    }
+
+                }
+            }
+            score = score + colorCount;
+            
+            cout << "\n## EVALUATION ##" << endl;
+            cout << "colorCount = " << colorCount << endl;
+            cout << "adjacent color error = " << score - colorCount << endl;
+            cout << "Score = " << score << endl;
+            return score;
+        }
+};
+
 
 int main(int argc, char** argv) {
-    srand(16462); //seeding random number generator
+    srand(16462);
     vector<int> GraphArgs(3);
 
     if (argc > 1) {
-        //cout << "argv[1] = " << argv[1] << endl;
+        cout << "argv[1] = " << argv[1] << endl;
     }
     else {
         cout << "No file name entered.";
@@ -323,13 +367,16 @@ int main(int argc, char** argv) {
     cout << "Arguments from file: " << endl;
     cout << "VertCount = " << GraphArgs.at(0) << endl;
     cout << "EdgeCount = " << GraphArgs.at(1) << endl;
-    cout << "Start ColorCount = " << GraphArgs.at(2) << endl << endl;
 
-    Graph myGraph = Graph(GraphArgs.at(0), GraphArgs.at(1), GraphArgs.at(2));
+    Graph graph(GraphArgs.at(0), GraphArgs.at(1));
+    Colorizer colorizer(graph);
 
-    int iterations = 3;
+    colorizer.Colorize(graph, false);
+    //graph.PrintVertList();
+    //graph.PrintStatistics();
+    colorizer.Evaluate(graph);
 
-    GreatestFunction(myGraph, iterations);
+    graph.GraphVizToFile();
 
     return 0;
 }
