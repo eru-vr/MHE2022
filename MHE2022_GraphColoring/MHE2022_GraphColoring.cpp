@@ -3,15 +3,19 @@
     Temat: Graph Coloring
     Autor: Jaromir Daruk
     Index: s16462
-
 */
 
 /*
-    Parametry na ktorych bedzie oparty graf i generowanie rozwiazan dla niego.
-    TODO: Przerobienie na wprowadzanie tych zmiennych poprzez argumenty z linii polecen.
-
+    Graph vizualizer 
     https://dreampuf.github.io/GraphvizOnline/
  */
+
+/*
+    TODO: Algorytymy:
+            - Wspinaczkowy
+            - Tabu
+            - Genetyczny
+*/
 
 #include <vector>
 #include <map>
@@ -147,66 +151,17 @@ class Graph {
                 }
             }
         }
-        void GraphVizToFile() {
-            /*
-                graph G {
-            0 [style=filled fillcolor=red]
-            1 [style=filled fillcolor=red]
-            2 [style=filled fillcolor=blue]
-            3 [style=filled fillcolor=green]
-            4 [style=filled fillcolor=blue]
-            5 [style=filled fillcolor=red]
-
-            0--5
-
-            1--4
-            1--3
-            1--2
-
-            2--3
-            2--1
-
-            3--2
-            3--5
-            3--1
-
-            4--5
-            4--1
-
-            5--4
-            5--3
-            5--0
-            }
-            */
-            stringstream out;
-            out << "graph G {" << endl;
-            int num = 0;
-            for (auto vert : vertices) {
-                out << vert.GetIndex() << " [ style = filled fillcolor = \"#" << vert.GetHexColor() << "\"] " << endl;
-                num++;
-            }
-
-            for (auto vert : vertices) {
-                for (auto adj : vert.GetAdjacent()) {
-                        out << vert.GetIndex() << " -- " << adj << endl;
-                }
-            }
-
-            out << "}" << endl;
-            ofstream myfile;
-            myfile.open("GraphViz.txt");
-            myfile << out.str();
-            myfile.close();
-            return;
-        }
         void PrintVertList() {
+            cout << "## Vertex list ##\n";
             for (int i = 0; i < vertices.size(); i++) {
                 cout << "(" << vertices[i].GetIndex() << ") | col = (" << vertices[i].GetColorIndex() << ") | adjacent = { ";
                 vertices[i].PrintAdjacent();
                 cout << "}\n";
             }
+            cout << endl;
         }
         void PrintStatistics() {
+            cout << "## Graph Stats ##\n";
             cout << "Graph has " << vertCount << " vertices.\n";
             cout << "Graph has " << edgeCount << " edges.\n";
             cout << "Graph has " << isolatedCount << " isolated vertices.\n";
@@ -217,6 +172,7 @@ class Graph {
             }
             cout << "Graph has " << coloredCount << " colored vertices.\n";
             cout << "Graph has " << badEdgesCount << " edges that are connected to single vertex.\n";
+            cout << endl;
         }
 
         Graph(int vertcount, int edgecount) {
@@ -225,8 +181,8 @@ class Graph {
             vertices = GenerateVertices();
             GenerateGraph();
         }
-        Graph() {
-        }
+        Graph() {}
+
 };
 
 class Colorizer {
@@ -236,27 +192,31 @@ class Colorizer {
         void Colorize(Graph &graph, bool showInfo) {
             random_device rd;
             mt19937 gen(rd());
+            uniform_int_distribution<> dis2(2, graph.vertices.size());
+            colorCount = dis2(gen);
             uniform_int_distribution<> dis(1, colorCount);
+            if (showInfo) cout << "colorCount = " << colorCount << endl;
             for (int i = 0; i < graph.vertices.size(); i++) {
                 int color = dis(gen);
                 graph.vertices[i].SetColor(color);
-                if (showInfo) {
-                    cout << "Vert [" << i << "] = " << color << endl;
-                }
+                if (showInfo) cout << "Vert [" << i << "] = " << color << endl;
             }
-            uniform_int_distribution<> dis2(2, graph.vertices.size());
-            colorCount = dis2(gen);
         }
 
         Colorizer(Graph& graph) {
             colorCount = graph.vertices.size();
         }
+};
 
-        int Evaluate(Graph& graph, bool showInfo) {
-            int score = 0, errors = 0;
+class Evaluator {
+    public:
+        int score=0, errors = 0;
+        int adjacentColorErrorWeight = 1, colorCountWeight = 61;
+
+        void Evaluate(Graph& graph, Colorizer& colorizer, bool showInfo) {
             for (int i = 0; i < graph.vertices.size(); i++) {
-               //cout << "\nvert = " << graph.vertices[i].GetIndex() << endl;
-                //graph.vertices[i].PrintAdjacent();
+                //cout << "\nvert = " << graph.vertices[i].GetIndex() << endl;
+                 //graph.vertices[i].PrintAdjacent();
                 for (auto adj : graph.vertices[i].GetAdjacent()) {
                     //cout << "adj idx = " << adj << endl;
                     int adjColor = graph.vertices[adj].GetColorIndex();
@@ -264,19 +224,72 @@ class Colorizer {
                     {
                         errors++;
                     }
-
                 }
             }
-            score = errors + colorCount*50;
-            if(showInfo){ 
+
+            score = (errors * adjacentColorErrorWeight) + (colorizer.colorCount * colorCountWeight);
+            if (showInfo) {
                 cout << "\n## EVALUATION ##" << endl;
-                cout << "colorCount = " << colorCount << endl;
-                cout << "adjacent color error = " << score - colorCount << endl;
+                cout << "colorCount = " << colorizer.colorCount << endl;
+                cout << "adjacent color error = " << score - colorizer.colorCount << endl;
                 cout << "Score = " << score << endl << endl;
             }
-            return score;
         }
+        Evaluator(){}
 };
+
+void GraphVizToFile(Graph& graph) {
+    /*
+        graph G {
+    0 [style=filled fillcolor=red]
+    1 [style=filled fillcolor=red]
+    2 [style=filled fillcolor=blue]
+    3 [style=filled fillcolor=green]
+    4 [style=filled fillcolor=blue]
+    5 [style=filled fillcolor=red]
+
+    0--5
+
+    1--4
+    1--3
+    1--2
+
+    2--3
+    2--1
+
+    3--2
+    3--5
+    3--1
+
+    4--5
+    4--1
+
+    5--4
+    5--3
+    5--0
+    }
+    */
+    stringstream out;
+    out << "graph G {" << endl;
+    int num = 0;
+    for (auto vert : graph.vertices) {
+        out << vert.GetIndex() << " [ style = filled fillcolor = \"#" << vert.GetHexColor() << "\"] " << endl;
+        num++;
+    }
+
+    for (auto vert : graph.vertices) {
+        for (auto adj : vert.GetAdjacent()) {
+            out << vert.GetIndex() << " -- " << adj << endl;
+        }
+    }
+
+    out << "}" << endl;
+    ofstream myfile;
+    myfile.open("GraphViz.txt");
+    myfile << out.str();
+    myfile.close();
+    return;
+}
 
 
 int main(int argc, char** argv) {
@@ -284,10 +297,10 @@ int main(int argc, char** argv) {
     vector<int> GraphArgs(3);
 
     if (argc > 1) {
-        cout << "argv[1] = " << argv[1] << endl;
+        //cout << "argv[1] = " << argv[1] << endl;
     }
     else {
-        cout << "No file name entered.";
+        cout << "No file name entered.\n\n";
         return -1;
     }
     ifstream infile(argv[1]); //otwiera plik
@@ -301,7 +314,7 @@ int main(int argc, char** argv) {
         }
     }
     else {
-        cout << "Failed to open file..";
+        cout << "Failed to open file..\n\n";
         return -2;
     }
 
@@ -309,34 +322,44 @@ int main(int argc, char** argv) {
     cout << "VertCount = " << GraphArgs.at(0) << endl;
     cout << "EdgeCount = " << GraphArgs.at(1) << endl;
     cout << "Iterations = " << GraphArgs.at(2) << endl;
+    cout << endl;
 
     Graph graph(GraphArgs.at(0), GraphArgs.at(1));
 
-    cout << "Coloring...\n";
+    cout << "Coloring...\n\n";
     Colorizer colorizer(graph);
 
-    int currentScore = 0, colorCount = 0, bestScore = 10000;
-    Graph bestGraph;
+    Evaluator evaluator;
+    Graph bestColoredGraph;
+    int currentScore = 0, bestColorCount = 0, bestScore = 10000000, bestErrorCount = 0;
+    int colorCountWeight=1, adjacentColorErrorWeight=1;
 
     for (int i = 0; i <= GraphArgs.at(2); i++) {
         colorizer.Colorize(graph, false);
-        currentScore = colorizer.Evaluate(graph, true);
+        evaluator.Evaluate(graph, colorizer, false);
+        currentScore = evaluator.score;
         if (currentScore < bestScore) {
-            cout << "biere\n\n\n\n\n\n";
             bestScore = currentScore;
-            colorCount = colorizer.colorCount;
-            bestGraph = graph;
+            bestColorCount = colorizer.colorCount;
+            bestErrorCount = evaluator.errors;
+            colorCountWeight = evaluator.colorCountWeight;
+            adjacentColorErrorWeight = evaluator.adjacentColorErrorWeight;
+            bestColoredGraph = graph;
+            
+
         }
     }
 
+    bestColoredGraph.PrintVertList();
+    bestColoredGraph.PrintStatistics();
+
     cout << "\n## Best Graph Evaluation ##" << endl;
     cout << "Best score = " << bestScore << endl;
-    cout << "Best colors used = " << colorCount << endl;
+    cout << "Best colors used = " << bestColorCount << " (weighted - " << bestColorCount * colorCountWeight << ")" << endl;
+    cout << "Adjacent color error = " << bestErrorCount << " (weighted - " << bestErrorCount * adjacentColorErrorWeight << ")" << endl;
 
-    //graph.PrintVertList();
-    graph.PrintStatistics();
-    bestGraph.GraphVizToFile();
+    GraphVizToFile(bestColoredGraph);
 
-    cout << endl;
+    cout << "\n\n";
     return 0;
 }
