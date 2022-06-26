@@ -26,8 +26,11 @@
 #include <iterator>
 #include <sstream>
 #include <random>
+#include <array>
+#include <chrono>
 
 using namespace std;
+
 
 class Graph {
     private:
@@ -91,6 +94,7 @@ class Graph {
         };
 
         void GenerateGraph() {
+            // problem
             /*
                 - Kazdy wierzcholek musi miec conajmniej jedna krawedz = obsluga wyizolowanych wierzcholkow
                 - Nie moze byc duplikatow krawedzi.
@@ -151,6 +155,7 @@ class Graph {
                 }
             }
         }
+
         void PrintVertList() {
             cout << "## Vertex list ##\n";
             for (int i = 0; i < vertices.size(); i++) {
@@ -186,59 +191,27 @@ class Graph {
 };
 
 class Colorizer {
-    public:
-        int colorCount;
+    // Solution
+public:
+    Graph RandomColorize(Graph graph, int colorCount, bool showInfo) {
+        if (colorCount < 2) { cout << "colorCount has to be more than 2!\n"; 
+            return graph; }
 
-        void Colorize(Graph &graph, bool showInfo) {
-            random_device rd;
-            mt19937 gen(rd());
-            uniform_int_distribution<> dis2(2, graph.vertices.size());
-            colorCount = dis2(gen);
-            graph.colorCount = colorCount;
-            uniform_int_distribution<> dis(1, colorCount);
-            if (showInfo) cout << "colorCount = " << colorCount << endl;
-            for (int i = 0; i < graph.vertices.size(); i++) {
-                int color = dis(gen);
-                graph.vertices[i].SetColor(color);
-                if (showInfo) cout << "Vert [" << i << "] = " << color << endl;
-            }
+        Graph coloredGraph = graph;
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<> dis(2, colorCount);
+        coloredGraph.colorCount = colorCount;
+        for (int i = 0; i < coloredGraph.vertices.size(); i++) {
+            int color = dis(gen);
+            coloredGraph.vertices[i].SetColor(color);
+            if (showInfo) cout << "Vert [" << i << "] = " << color << endl;
         }
-
-        Colorizer(Graph& graph) {
-            colorCount = graph.vertices.size();
-        }
+        return coloredGraph;
+    }
+    Colorizer() {}
 };
 
-class Evaluator {
-    public:
-        int score=0, errors = 0;
-        int adjacentColorErrorWeight = 1, colorCountWeight = 20;
-
-        int GoalFunction(Graph& graph, bool showInfo) {
-            for (int i = 0; i < graph.vertices.size(); i++) {
-                //cout << "\nvert = " << graph.vertices[i].GetIndex() << endl;
-                 //graph.vertices[i].PrintAdjacent();
-                for (auto adj : graph.vertices[i].GetAdjacent()) {
-                    //cout << "adj idx = " << adj << endl;
-                    int adjColor = graph.vertices[adj].GetColorIndex();
-                    if (graph.vertices[i].GetColorIndex() == adjColor)
-                    {
-                        errors++;
-                    }
-                }
-            }
-
-            score = (errors * adjacentColorErrorWeight) + (graph.colorCount * colorCountWeight);
-            if (showInfo) {
-                cout << "\n## EVALUATION ##" << endl;
-                cout << "colorCount = " << graph.colorCount << endl;
-                cout << "adjacent color error = " << score - graph.colorCount << endl;
-                cout << "Score = " << score << endl << endl;
-            }
-            return score;
-        }
-        Evaluator(){}
-};
 
 void GraphVizToFile(Graph& graph) {
     /*
@@ -293,13 +266,103 @@ void GraphVizToFile(Graph& graph) {
     return;
 }
 
-void IteratedLocalSearch() {
+vector<Graph> GetNeighbors(Graph coloredGraph, bool showInfo) {
+    vector<Graph> neighbourGraphs;
+    int colorCount = coloredGraph.colorCount;
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> dis(1, colorCount);
+    uniform_int_distribution<> dis2(0, coloredGraph.vertCount-1);
+    if (showInfo) { cout << "### Neighborhood ###\n"; }
+    for (int i = 0; i < coloredGraph.vertCount/5; i++) {
+        Graph neighbour = coloredGraph;
+        int newColor = dis(gen);
+        int vertIndex = dis2(gen);
+        neighbour.vertices[vertIndex].SetColor(newColor);
+        neighbourGraphs.push_back(neighbour);
 
+        if (showInfo) { cout << "vert (" << vertIndex << ") - col (" << newColor << ")\n"; }
+    }
+    return neighbourGraphs;
+}
+
+int Evaluate(Graph coloredGraph, bool showInfo) {
+    int errors = 0;
+    for (int i = 0; i < coloredGraph.vertices.size(); i++) {
+        for (auto adj : coloredGraph.vertices[i].GetAdjacent()) {
+            int adjColor = coloredGraph.vertices[adj].GetColorIndex();
+            if (coloredGraph.vertices[i].GetColorIndex() == adjColor){
+                errors++;
+            }
+        }
+    }
+    if (showInfo) cout << "Errors (score) = " << errors << endl;
+    return errors;
+}
+
+Graph Algoritm_HillClimbing(Graph graph, Colorizer colorizer, int colorCount, int iterations, bool showInfo) {
+    cout << "HillClimbing started...\n";
+    Graph bestSolution, bestNeighbor;
+    int bestScore;
+    for (int i = 0; i < iterations; i++) {
+        Graph solution = colorizer.RandomColorize(graph, colorCount, false);
+        int solutionScore = Evaluate(solution, false);
+
+        if (i == 0) bestSolution = solution;
+        auto neighbors = GetNeighbors(solution, false);
+
+        // Finding best neighbor
+        for (int k = 0; k < neighbors.size(); k++) {
+            int currentScore = Evaluate(neighbors[k], false);
+
+            if (k == 0) bestScore = currentScore;
+            if (currentScore < bestScore) {
+                bestNeighbor = neighbors[k];
+                bestScore = currentScore;
+            }
+        }
+        if (showInfo) cout << solutionScore << " > " << bestScore << endl;
+        if (solutionScore < bestScore) {
+            bestSolution = solution;
+            if (showInfo) cout << "## ";
+        }
+        else {
+            return bestSolution;
+        }
+
+    }
+}
+
+Graph Algoritm_HillClimbingRandom(Graph graph, Colorizer colorizer, int colorCount, int iterations, bool showInfo) {
+    cout << "Random HillClimbing started...\n";
+    Graph bestSolution;
+    for(int i = 0; i < iterations; i++){
+        Graph solution = colorizer.RandomColorize(graph, colorCount, false);
+        if (i == 0) bestSolution = solution;
+        random_device rd;
+        mt19937 gen(rd());
+        for (int i = 0; i < 50; i++) {
+            auto neighbors = GetNeighbors(solution, false);
+            uniform_int_distribution<> dis(0, neighbors.size() - 1);
+            int neighborIndex = dis(gen);
+            Graph neighbor = neighbors[neighborIndex];
+
+            int solScore = Evaluate(solution, false);
+            int bestScore = Evaluate(bestSolution, false);
+            if (solScore < bestScore) {
+                bestSolution = solution;
+                if (showInfo) cout << "## ";
+            }
+            if (showInfo) cout << solScore << " < " << bestScore << endl;
+            solution = neighbor;
+        }
+    }
+    return bestSolution;
 }
 
 int main(int argc, char** argv) {
     srand(16462);
-    vector<int> GraphArgs(3);
+    vector<int> GraphArgs(4);
 
     if (argc > 1) {
         //cout << "argv[1] = " << argv[1] << endl;
@@ -322,48 +385,48 @@ int main(int argc, char** argv) {
         cout << "Failed to open file..\n\n";
         return -2;
     }
+    int vertCount = GraphArgs.at(0), 
+        edgeCount = GraphArgs.at(1), 
+        iterations = GraphArgs.at(2), 
+        maxColorCount = GraphArgs.at(3);
 
     cout << "Arguments from file: " << endl;
-    cout << "VertCount = " << GraphArgs.at(0) << endl;
-    cout << "EdgeCount = " << GraphArgs.at(1) << endl;
-    cout << "Iterations = " << GraphArgs.at(2) << endl;
+    cout << "VertCount = " << vertCount << endl;
+    cout << "EdgeCount = " << edgeCount << endl;
+    cout << "Iterations = " << iterations << endl;
+    cout << "Max color count = " << maxColorCount << endl;
+
     cout << endl;
 
-    Graph graph(GraphArgs.at(0), GraphArgs.at(1));
+    Graph graph(vertCount, edgeCount);
+    cout << endl;
+    graph.PrintStatistics();
 
-    cout << "Coloring...\n\n";
-    Colorizer colorizer(graph);
+    Colorizer colorizer;
 
-    Evaluator evaluator;
-    Graph bestColoredGraph;
-    int currentScore = 0, bestColorCount = 0, bestScore = 10000000, bestErrorCount = 0;
-    int colorCountWeight=1, adjacentColorErrorWeight=1;
+    auto calculation_start = chrono::steady_clock::now();
+    Graph HillClimbSolution = Algoritm_HillClimbing(graph, colorizer, maxColorCount, iterations, true);
+    auto calculation_end = chrono::steady_clock::now();
+    chrono::duration<double> calculation_duration = calculation_end - calculation_start;
+    cout << "Calculation_time: " << calculation_duration.count() << endl;
 
-    for (int i = 0; i <= GraphArgs.at(2); i++) {
-        colorizer.Colorize(graph, false);
-        currentScore = evaluator.GoalFunction(graph, false);
-        if (currentScore < bestScore) {
-            bestScore = currentScore;
-            bestColoredGraph = graph;
+    Evaluate(HillClimbSolution, true);
+    cout << endl;
 
-            bestColorCount = bestColoredGraph.colorCount;
-            bestErrorCount = evaluator.errors;
-            colorCountWeight = evaluator.colorCountWeight;
-            adjacentColorErrorWeight = evaluator.adjacentColorErrorWeight;
+    calculation_start = chrono::steady_clock::now();
+    Graph HillClimbRandomSolution = Algoritm_HillClimbingRandom(graph, colorizer, maxColorCount, iterations, true);
+    calculation_end = chrono::steady_clock::now();
+    calculation_duration = calculation_end - calculation_start;
+    cout << "Calculation_time: " << calculation_duration.count() << endl;
 
-        }
-    }
+    Evaluate(HillClimbRandomSolution, true);
+    cout << endl;
 
-    bestColoredGraph.PrintVertList();
-    bestColoredGraph.PrintStatistics();
 
-    cout << "\n## Best Graph Evaluation ##" << endl;
-    cout << "Best score = " << bestScore << endl;
-    cout << "Best colors used = " << bestColorCount << " (weighted - " << bestColorCount * colorCountWeight << ")" << endl;
-    cout << "Adjacent color error = " << bestErrorCount << " (weighted - " << bestErrorCount * adjacentColorErrorWeight << ")" << endl;
 
-    GraphVizToFile(bestColoredGraph);
 
+
+    GraphVizToFile(HillClimbSolution);
     cout << "\n\n";
     return 0;
 }
