@@ -200,7 +200,7 @@ public:
         Graph coloredGraph = graph;
         random_device rd;
         mt19937 gen(rd());
-        uniform_int_distribution<> dis(2, colorCount);
+        uniform_int_distribution<> dis(1, colorCount);
         coloredGraph.colorCount = colorCount;
         for (int i = 0; i < coloredGraph.vertices.size(); i++) {
             int color = dis(gen);
@@ -268,10 +268,10 @@ void GraphVizToFile(Graph& graph) {
 
 vector<Graph> GetNeighbors(Graph coloredGraph, bool showInfo) {
     vector<Graph> neighbourGraphs;
-    int colorCount = coloredGraph.colorCount;
     random_device rd;
     mt19937 gen(rd());
-    uniform_int_distribution<> dis(1, colorCount);
+
+    uniform_int_distribution<> dis(1, coloredGraph.colorCount);
     uniform_int_distribution<> dis2(0, coloredGraph.vertCount-1);
     if (showInfo) { cout << "### Neighborhood ###\n"; }
     for (int i = 0; i < coloredGraph.vertCount/5; i++) {
@@ -300,62 +300,67 @@ int Evaluate(Graph coloredGraph, bool showInfo) {
     return errors;
 }
 
+Graph GetBestNeighbor(Graph solution) {
+    int bestNeighborScore, currentNeighborScore;
+    Graph bestNeighbor = solution;
+    auto neighbors = GetNeighbors(solution, false);
+
+    // Finding best neighbor
+    for (int k = 0; k < neighbors.size(); k++) {
+        currentNeighborScore = Evaluate(neighbors[k], false);
+        bestNeighborScore = Evaluate(bestNeighbor, false);
+
+        //cout << "currentNeighborScore = " << currentNeighborScore <<" < " <<" bestNeighborScore  = " << bestNeighborScore << endl;
+        if (currentNeighborScore < bestNeighborScore) {
+            bestNeighbor = neighbors[k];
+        }
+    }
+    return bestNeighbor;
+}
+
 Graph Algoritm_HillClimbing(Graph graph, Colorizer colorizer, int colorCount, int iterations, bool showInfo) {
     cout << "HillClimbing started...\n";
-    Graph bestSolution, bestNeighbor;
-    int bestScore;
-    for (int i = 0; i < iterations; i++) {
-        Graph solution = colorizer.RandomColorize(graph, colorCount, false);
-        int solutionScore = Evaluate(solution, false);
-
-        if (i == 0) bestSolution = solution;
-        auto neighbors = GetNeighbors(solution, false);
-
-        // Finding best neighbor
-        for (int k = 0; k < neighbors.size(); k++) {
-            int currentScore = Evaluate(neighbors[k], false);
-
-            if (k == 0) bestScore = currentScore;
-            if (currentScore < bestScore) {
-                bestNeighbor = neighbors[k];
-                bestScore = currentScore;
-            }
-        }
-        if (showInfo) cout << solutionScore << " > " << bestScore << endl;
-        if (solutionScore < bestScore) {
-            bestSolution = solution;
-            if (showInfo) cout << "## ";
+    Graph bestNeighbor;
+    int solutionScore, bestNeighborScore, iteration_counter = 0;
+    Graph solution = colorizer.RandomColorize(graph, colorCount, false);
+    for(int i = 0; i < iterations; i++){
+        bestNeighbor = GetBestNeighbor(solution);
+        solutionScore = Evaluate(solution, false);
+        bestNeighborScore = Evaluate(bestNeighbor, false);
+        if (bestNeighborScore < solutionScore) {
+            solution = bestNeighbor;
+            if (showInfo) cout << "## " << bestNeighborScore << " < " << solutionScore << endl;
         }
         else {
-            return bestSolution;
+            return solution;
         }
-
     }
 }
 
 Graph Algoritm_HillClimbingRandom(Graph graph, Colorizer colorizer, int colorCount, int iterations, bool showInfo) {
     cout << "Random HillClimbing started...\n";
     Graph bestSolution;
+    int solScore, bestScore;
+    Graph solution = colorizer.RandomColorize(graph, colorCount, false);
     for(int i = 0; i < iterations; i++){
-        Graph solution = colorizer.RandomColorize(graph, colorCount, false);
         if (i == 0) bestSolution = solution;
+
         random_device rd;
         mt19937 gen(rd());
-        for (int i = 0; i < 50; i++) {
-            auto neighbors = GetNeighbors(solution, false);
-            uniform_int_distribution<> dis(0, neighbors.size() - 1);
-            int neighborIndex = dis(gen);
-            Graph neighbor = neighbors[neighborIndex];
+        auto neighbors = GetNeighbors(solution, false);
 
-            int solScore = Evaluate(solution, false);
-            int bestScore = Evaluate(bestSolution, false);
-            if (solScore < bestScore) {
-                bestSolution = solution;
-                if (showInfo) cout << "## ";
-            }
-            if (showInfo) cout << solScore << " < " << bestScore << endl;
-            solution = neighbor;
+        uniform_int_distribution<> dis(0, neighbors.size() - 1);
+        int neighborIndex = dis(gen);
+        Graph neighbor = neighbors[neighborIndex];
+
+        solScore = Evaluate(solution, false);
+        bestScore = Evaluate(bestSolution, false);
+        if (solScore < bestScore) {
+            bestSolution = solution;
+            if (showInfo) cout << "## ";
         }
+        if (showInfo) cout << solScore << " < " << bestScore << endl;
+        solution = neighbor;
     }
     return bestSolution;
 }
