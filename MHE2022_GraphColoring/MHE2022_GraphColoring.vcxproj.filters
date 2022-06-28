@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="MHE2022_GraphColoring.cpp">
+    <ClCompile Include="Main_GraphColoring.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

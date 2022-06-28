@@ -33,14 +33,12 @@ using namespace std;
 
 
 class Graph {
-    private:
+    public:
         class Vert {
-        private:
+        public:
             int index, colorIndex;
             string hexColor;
             vector<int> adjacentIndices;
-
-        public:
             int GetIndex() { return index; }
             int GetColorIndex() { return colorIndex; }
             void SetColor(int color) {
@@ -65,6 +63,8 @@ class Graph {
 
             string GetHexColor() { return hexColor; }
             void SetAdjacent(int index) { adjacentIndices.push_back(index); }
+            void SetAdjacentVector(vector<int> adjacentVector) { adjacentIndices = adjacentVector; }
+
             vector<int> GetAdjacent() { return adjacentIndices; }
 
             void PrintAdjacent() {
@@ -79,19 +79,8 @@ class Graph {
             }
         };
      
-    public:
         vector<Vert> vertices;
         int vertCount, edgeCount, isolatedCount, coloredVertCount, badEdgesCount, colorCount;
-
-        vector<Vert> GenerateVertices() {
-            vector<Vert> vertices;
-            cout << "Generating vertex list...\n";
-            for (int i = 0; i < vertCount; i++) {
-                Vert currentVertex(i);
-                vertices.push_back(currentVertex); //add to the end of list
-            }
-            return vertices;
-        };
 
         void GenerateGraph() {
             // problem
@@ -155,7 +144,7 @@ class Graph {
                 }
             }
         }
-
+      
         void PrintVertList() {
             cout << "## Vertex list ##\n";
             for (int i = 0; i < vertices.size(); i++) {
@@ -180,15 +169,15 @@ class Graph {
             cout << endl;
         }
 
-        Graph(int vertcount, int edgecount) {
+        Graph(int vertcount, int edgecount, vector<Vert> vertVector) {
             vertCount = vertcount;
             edgeCount = edgecount;
-            vertices = GenerateVertices();
-            GenerateGraph();
+            vertices = vertVector;
         }
         Graph() {}
 
 };
+
 
 class Colorizer {
     // Solution
@@ -212,8 +201,64 @@ public:
     Colorizer() {}
 };
 
+vector<Graph::Vert> GenerateVertices(int vertCount) {
+    cout << "Generating vertex list...\n";
+    vector<Graph::Vert> vertices;
+    for (int i = 0; i < vertCount; i++) {
+        Graph::Vert currentVertex(i);
+        vertices.push_back(currentVertex); //add to the end of list
+    }
+    return vertices;
+};
 
-void GraphVizToFile(Graph& graph) {
+void SaveGraphToFile(Graph graph) {
+    cout << "Saving graph to file...\n";
+
+    stringstream out;
+    for (auto vert : graph.vertices) {
+        for (auto adj : vert.GetAdjacent()) {
+            out << adj << " ";
+        }
+        out << endl;
+    }
+
+    ofstream myfile;
+    myfile.open("myGraph.txt");
+    myfile << out.str();
+    myfile.close();
+    return;
+}
+vector<Graph::Vert> LoadGraphFromFile(string fname, bool showInfo) {
+    cout << "Loading graph from file...\n";
+
+    vector<Graph::Vert> vertices;
+
+    ifstream infile(fname); //otwiera plik
+    if (infile.is_open() && infile.good()) { //check czy otwarty
+        string line = "";
+        int i = 0;
+        while (getline(infile, line)) {
+            Graph::Vert currentVertex(i);
+            stringstream stringadj(line);
+            int num;
+            vector<int> adj;
+            while (stringadj >> num)
+                adj.push_back(num);
+            if (showInfo) cout << "[" << currentVertex.GetIndex() << "] - " << line << endl;
+
+            currentVertex.SetAdjacentVector(adj);
+            //GraphArgs.at(i) = stoi(line);
+            vertices.push_back(currentVertex); //add to the end of list
+            i++;
+        }
+        return vertices;
+    }
+    else {
+        cout << "Failed to open Graph file..\n\n";
+        return vertices;
+    }
+}
+void GraphVizToFile(Graph graph, string fname) {
     /*
         graph G {
     0 [style=filled fillcolor=red]
@@ -260,7 +305,7 @@ void GraphVizToFile(Graph& graph) {
 
     out << "}" << endl;
     ofstream myfile;
-    myfile.open("GraphViz.txt");
+    myfile.open(fname);
     myfile << out.str();
     myfile.close();
     return;
@@ -327,6 +372,7 @@ Graph Algoritm_HillClimbing(Graph graph, Colorizer colorizer, int colorCount, in
         bestNeighbor = GetBestNeighbor(solution);
         solutionScore = Evaluate(solution, false);
         bestNeighborScore = Evaluate(bestNeighbor, false);
+
         if (bestNeighborScore < solutionScore) {
             solution = bestNeighbor;
             if (showInfo) cout << "## " << bestNeighborScore << " < " << solutionScore << endl;
@@ -395,6 +441,8 @@ int main(int argc, char** argv) {
         iterations = GraphArgs.at(2), 
         maxColorCount = GraphArgs.at(3);
 
+    //TODO aby pokazywało ilość wierzchołków z pliku. z Edgami będzie problem. Info że po prostu ładuje z pliku
+
     cout << "Arguments from file: " << endl;
     cout << "VertCount = " << vertCount << endl;
     cout << "EdgeCount = " << edgeCount << endl;
@@ -403,35 +451,42 @@ int main(int argc, char** argv) {
 
     cout << endl;
 
-    Graph graph(vertCount, edgeCount);
-    cout << endl;
-    graph.PrintStatistics();
+    //Graph graph(vertCount, edgeCount, GenerateVertices(vertCount));
+    //SaveGraphToFile(graph);
+
+    Graph graph(vertCount, edgeCount, LoadGraphFromFile("myGraph.txt", false));
+    //TODO aby pokazywało ilość wierzchołków z pliku. z Edgami będzie problem. Info że po prostu ładuje z pliku
+    //TODO VertCount i edge count tu jest zbyteczny jak ładuje z pliku
+    //TODO jeśli failed to load graph life to return
+
+    //graph.PrintVertList();
+    //cout << endl;
+    //graph.PrintStatistics(); // doesn't count isolated vertices and bad edges if vertices loaded from file
 
     Colorizer colorizer;
 
     auto calculation_start = chrono::steady_clock::now();
-    Graph HillClimbSolution = Algoritm_HillClimbing(graph, colorizer, maxColorCount, iterations, true);
+    Graph HillClimbSolution = Algoritm_HillClimbing(graph, colorizer, maxColorCount, iterations, false);
     auto calculation_end = chrono::steady_clock::now();
     chrono::duration<double> calculation_duration = calculation_end - calculation_start;
     cout << "Calculation_time: " << calculation_duration.count() << endl;
 
     Evaluate(HillClimbSolution, true);
+    GraphVizToFile(HillClimbSolution, "VIZ_HillClimb.txt");
     cout << endl;
 
     calculation_start = chrono::steady_clock::now();
-    Graph HillClimbRandomSolution = Algoritm_HillClimbingRandom(graph, colorizer, maxColorCount, iterations, true);
+    Graph HillClimbRandomSolution = Algoritm_HillClimbingRandom(graph, colorizer, maxColorCount, iterations, false);
     calculation_end = chrono::steady_clock::now();
     calculation_duration = calculation_end - calculation_start;
     cout << "Calculation_time: " << calculation_duration.count() << endl;
 
     Evaluate(HillClimbRandomSolution, true);
+    GraphVizToFile(HillClimbRandomSolution, "VIZ_HillClimbRandom.txt");
     cout << endl;
 
 
 
-
-
-    GraphVizToFile(HillClimbSolution);
     cout << "\n\n";
     return 0;
 }
