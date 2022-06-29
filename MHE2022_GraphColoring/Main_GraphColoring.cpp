@@ -18,7 +18,8 @@
 */
 
 #include <vector>
-#include <map>
+#include <array>
+#include <list>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -26,10 +27,10 @@
 #include <iterator>
 #include <sstream>
 #include <random>
-#include <array>
 #include <chrono>
 
 using namespace std;
+
 
 
 class Graph {
@@ -81,7 +82,7 @@ class Graph {
      
         vector<Vert> vertices;
         int vertCount, edgeCount, isolatedCount, coloredVertCount, badEdgesCount, colorCount;
-
+        
         void GenerateGraph() {
             // problem
             /*
@@ -178,6 +179,15 @@ class Graph {
 
 };
 
+bool operator==(Graph a, Graph b)
+{
+    for (int i = 0; i < a.vertices.size();i++) {
+        if (a.vertices[i].GetColorIndex() != b.vertices[i].GetColorIndex()) {
+            return false;
+        }
+    }
+    return true;
+}
 
 class Colorizer {
     // Solution
@@ -311,26 +321,6 @@ void GraphVizToFile(Graph graph, string fname) {
     return;
 }
 
-vector<Graph> GetNeighbors(Graph coloredGraph, bool showInfo) {
-    vector<Graph> neighbourGraphs;
-    random_device rd;
-    mt19937 gen(rd());
-
-    uniform_int_distribution<> dis(1, coloredGraph.colorCount);
-    uniform_int_distribution<> dis2(0, coloredGraph.vertCount-1);
-    if (showInfo) { cout << "### Neighborhood ###\n"; }
-    for (int i = 0; i < coloredGraph.vertCount/5; i++) {
-        Graph neighbour = coloredGraph;
-        int newColor = dis(gen);
-        int vertIndex = dis2(gen);
-        neighbour.vertices[vertIndex].SetColor(newColor);
-        neighbourGraphs.push_back(neighbour);
-
-        if (showInfo) { cout << "vert (" << vertIndex << ") - col (" << newColor << ")\n"; }
-    }
-    return neighbourGraphs;
-}
-
 int Evaluate(Graph coloredGraph, bool showInfo) {
     int errors = 0;
     for (int i = 0; i < coloredGraph.vertices.size(); i++) {
@@ -343,6 +333,26 @@ int Evaluate(Graph coloredGraph, bool showInfo) {
     }
     if (showInfo) cout << "Errors (score) = " << errors << endl;
     return errors;
+}
+
+vector<Graph> GetNeighbors(Graph coloredGraph, bool showInfo) {
+    vector<Graph> neighbourGraphs;
+    random_device rd;
+    mt19937 gen(rd());
+
+    uniform_int_distribution<> dis(1, coloredGraph.colorCount);
+    uniform_int_distribution<> dis2(0, coloredGraph.vertCount - 1);
+    if (showInfo) { cout << "### Neighborhood ###\n"; }
+    for (int i = 0; i < coloredGraph.vertCount / 5; i++) {
+        Graph neighbour = coloredGraph;
+        int newColor = dis(gen);
+        int vertIndex = dis2(gen);
+        neighbour.vertices[vertIndex].SetColor(newColor);
+        neighbourGraphs.push_back(neighbour);
+
+        if (showInfo) { cout << "vert (" << vertIndex << ") - col (" << newColor << ")\n"; }
+    }
+    return neighbourGraphs;
 }
 
 Graph GetBestNeighbor(Graph solution) {
@@ -365,9 +375,9 @@ Graph GetBestNeighbor(Graph solution) {
 
 Graph Algoritm_HillClimbing(Graph graph, Colorizer colorizer, int colorCount, int iterations, bool showInfo) {
     cout << "HillClimbing started...\n";
-    Graph bestNeighbor;
-    int solutionScore, bestNeighborScore, iteration_counter = 0;
-    Graph solution = colorizer.RandomColorize(graph, colorCount, false);
+    int solutionScore, bestNeighborScore;
+    Graph bestNeighbor, solution = colorizer.RandomColorize(graph, colorCount, false);
+
     for(int i = 0; i < iterations; i++){
         bestNeighbor = GetBestNeighbor(solution);
         solutionScore = Evaluate(solution, false);
@@ -375,45 +385,83 @@ Graph Algoritm_HillClimbing(Graph graph, Colorizer colorizer, int colorCount, in
 
         if (bestNeighborScore < solutionScore) {
             solution = bestNeighbor;
-            if (showInfo) cout << "## " << bestNeighborScore << " < " << solutionScore << endl;
-        }
-        else {
-            return solution;
+            if (showInfo) cout << "## " << bestNeighborScore << " < " << solutionScore << " [" << i << "]" << endl;
         }
     }
+    return solution;
 }
 
 Graph Algoritm_HillClimbingRandom(Graph graph, Colorizer colorizer, int colorCount, int iterations, bool showInfo) {
     cout << "Random HillClimbing started...\n";
-    Graph bestSolution;
-    int solScore, bestScore;
-    Graph solution = colorizer.RandomColorize(graph, colorCount, false);
+    int solutionScore, bestNeighborScore, neighborIndex;
+    Graph randomNeighbor, solution = colorizer.RandomColorize(graph, colorCount, false);
+    random_device rd;
+    mt19937 gen(rd());
+
     for(int i = 0; i < iterations; i++){
-        if (i == 0) bestSolution = solution;
-
-        random_device rd;
-        mt19937 gen(rd());
         auto neighbors = GetNeighbors(solution, false);
-
         uniform_int_distribution<> dis(0, neighbors.size() - 1);
-        int neighborIndex = dis(gen);
-        Graph neighbor = neighbors[neighborIndex];
+        neighborIndex = dis(gen);
+        randomNeighbor = neighbors[neighborIndex];
 
-        solScore = Evaluate(solution, false);
-        bestScore = Evaluate(bestSolution, false);
-        if (solScore < bestScore) {
-            bestSolution = solution;
-            if (showInfo) cout << "## ";
+        solutionScore = Evaluate(solution, false);
+        bestNeighborScore = Evaluate(randomNeighbor, false);
+        if (bestNeighborScore < solutionScore) {
+            solution = randomNeighbor;
+            if (showInfo) cout << "## " << bestNeighborScore << " < " << solutionScore << " ["<<i<<"]" <<endl;
         }
-        if (showInfo) cout << solScore << " < " << bestScore << endl;
-        solution = neighbor;
     }
-    return bestSolution;
+    return solution;
+}
+
+Graph Algoritm_Tabu(Graph graph, Colorizer colorizer, int colorCount, int iterations, int maxTabuSize, bool showInfo) {
+    cout << "Tabu started...\n";
+    int solutionScore, bestNeighborScore;
+    bool isInTabu = false;
+    Graph bestNeighbor, solution = colorizer.RandomColorize(graph, colorCount, false);
+    list<Graph> tabu;
+    for (int i = 0; i < iterations; i++) {
+        bestNeighbor = GetBestNeighbor(solution);
+        
+        solutionScore = Evaluate(solution, false);
+        bestNeighborScore = Evaluate(bestNeighbor, false);
+
+        isInTabu = (find(tabu.begin(), tabu.end(), bestNeighbor) != tabu.end());
+        //cout << "isInTabu = " << isInTabu << ", size = "<< tabu.size() << endl;
+        if (bestNeighborScore < solutionScore && !isInTabu) {
+            solution = bestNeighbor;
+            if (showInfo) cout << "## " << bestNeighborScore << " < " << solutionScore << " [" << i << "]" << endl;
+        }
+
+        tabu.push_back(bestNeighbor);
+        if (maxTabuSize < tabu.size()) {
+            tabu.pop_front();
+        }
+    }
+    return solution;
+}
+
+Graph Algoritm_SimulatedAnnealing(Graph graph, Colorizer colorizer, int colorCount, int iterations, bool showInfo) {
+    cout << "Simulated Annealing started...\n";
+    int solutionScore, bestNeighborScore;
+    Graph bestNeighbor, solution = colorizer.RandomColorize(graph, colorCount, false);
+
+    for (int i = 0; i < iterations; i++) {
+        bestNeighbor = GetBestNeighbor(solution);
+        solutionScore = Evaluate(solution, false);
+        bestNeighborScore = Evaluate(bestNeighbor, false);
+
+        if (bestNeighborScore < solutionScore) {
+            solution = bestNeighbor;
+            if (showInfo) cout << "## " << bestNeighborScore << " < " << solutionScore << " [" << i << "]" << endl;
+        }
+    }
+    return solution;
 }
 
 int main(int argc, char** argv) {
     srand(16462);
-    vector<int> GraphArgs(4);
+    vector<int> GraphArgs(5);
 
     if (argc > 1) {
         //cout << "argv[1] = " << argv[1] << endl;
@@ -439,7 +487,8 @@ int main(int argc, char** argv) {
     int vertCount = GraphArgs.at(0), 
         edgeCount = GraphArgs.at(1), 
         iterations = GraphArgs.at(2), 
-        maxColorCount = GraphArgs.at(3);
+        maxColorCount = GraphArgs.at(3),
+        maxTabuSize = GraphArgs.at(4);
 
     //TODO aby pokazywało ilość wierzchołków z pliku. z Edgami będzie problem. Info że po prostu ładuje z pliku
 
@@ -448,25 +497,29 @@ int main(int argc, char** argv) {
     cout << "EdgeCount = " << edgeCount << endl;
     cout << "Iterations = " << iterations << endl;
     cout << "Max color count = " << maxColorCount << endl;
+    cout << "Max Tabu Size = " << maxTabuSize << endl;
 
     cout << endl;
 
-    //Graph graph(vertCount, edgeCount, GenerateVertices(vertCount));
-    //SaveGraphToFile(graph);
+    /*Graph graph(vertCount, edgeCount, GenerateVertices(vertCount));
+    graph.GenerateGraph();
+    SaveGraphToFile(graph);*/
 
     Graph graph(vertCount, edgeCount, LoadGraphFromFile("myGraph.txt", false));
-    //TODO aby pokazywało ilość wierzchołków z pliku. z Edgami będzie problem. Info że po prostu ładuje z pliku
-    //TODO VertCount i edge count tu jest zbyteczny jak ładuje z pliku
-    //TODO jeśli failed to load graph life to return
 
-    //graph.PrintVertList();
-    //cout << endl;
-    //graph.PrintStatistics(); // doesn't count isolated vertices and bad edges if vertices loaded from file
+    /*TODO aby pokazywało ilość wierzchołków z pliku. z Edgami będzie problem. Info że po prostu ładuje z pliku
+    TODO VertCount i edge count tu jest zbyteczny jak ładuje z pliku
+    TODO jeśli failed to load graph life to return*/
+
+    graph.PrintVertList();
+    cout << endl;
+    graph.PrintStatistics(); // doesn't count isolated vertices and bad edges if vertices loaded from 
+    
 
     Colorizer colorizer;
 
     auto calculation_start = chrono::steady_clock::now();
-    Graph HillClimbSolution = Algoritm_HillClimbing(graph, colorizer, maxColorCount, iterations, false);
+    Graph HillClimbSolution = Algoritm_HillClimbing(graph, colorizer, maxColorCount, iterations, true);
     auto calculation_end = chrono::steady_clock::now();
     chrono::duration<double> calculation_duration = calculation_end - calculation_start;
     cout << "Calculation_time: " << calculation_duration.count() << endl;
@@ -476,7 +529,7 @@ int main(int argc, char** argv) {
     cout << endl;
 
     calculation_start = chrono::steady_clock::now();
-    Graph HillClimbRandomSolution = Algoritm_HillClimbingRandom(graph, colorizer, maxColorCount, iterations, false);
+    Graph HillClimbRandomSolution = Algoritm_HillClimbingRandom(graph, colorizer, maxColorCount, iterations, true);
     calculation_end = chrono::steady_clock::now();
     calculation_duration = calculation_end - calculation_start;
     cout << "Calculation_time: " << calculation_duration.count() << endl;
@@ -485,6 +538,25 @@ int main(int argc, char** argv) {
     GraphVizToFile(HillClimbRandomSolution, "VIZ_HillClimbRandom.txt");
     cout << endl;
 
+    calculation_start = chrono::steady_clock::now();
+    Graph TabuSolution = Algoritm_Tabu(graph, colorizer, maxColorCount, iterations, maxTabuSize, true);
+    calculation_end = chrono::steady_clock::now();
+    calculation_duration = calculation_end - calculation_start;
+    cout << "Calculation_time: " << calculation_duration.count() << endl;
+
+    Evaluate(TabuSolution, true);
+    GraphVizToFile(TabuSolution, "VIZ_Tabu.txt");
+    cout << endl;
+
+    calculation_start = chrono::steady_clock::now();
+    Graph SimulatedAnnealing = Algoritm_SimulatedAnnealing(graph, colorizer, maxColorCount, iterations, true);
+    calculation_end = chrono::steady_clock::now();
+    calculation_duration = calculation_end - calculation_start;
+    cout << "Calculation_time: " << calculation_duration.count() << endl;
+
+    Evaluate(SimulatedAnnealing, true);
+    GraphVizToFile(SimulatedAnnealing, "VIZ_SimulatedAnnealing.txt");
+    cout << endl;
 
 
     cout << "\n\n";
