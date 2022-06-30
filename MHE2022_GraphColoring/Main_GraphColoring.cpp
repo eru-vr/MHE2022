@@ -28,6 +28,7 @@
 #include <sstream>
 #include <random>
 #include <chrono>
+#include <cmath>
 
 using namespace std;
 
@@ -410,7 +411,7 @@ Graph Algoritm_HillClimbingRandom(Graph graph,
                                   int iterations, 
                                   bool showInfo) {
     cout << "Random HillClimbing started...\n";
-    int solutionScore, bestNeighborScore, neighborIndex;
+    int solutionScore, randomNeighborScore, neighborIndex;
     Graph randomNeighbor, solution = colorizer.RandomColorize(graph, colorCount, false);
     random_device rd;
     mt19937 gen(rd());
@@ -422,10 +423,10 @@ Graph Algoritm_HillClimbingRandom(Graph graph,
         randomNeighbor = neighbors[neighborIndex];
 
         solutionScore = Evaluate(solution, false);
-        bestNeighborScore = Evaluate(randomNeighbor, false);
-        if (bestNeighborScore < solutionScore) {
+        randomNeighborScore = Evaluate(randomNeighbor, false);
+        if (randomNeighborScore < solutionScore) {
             solution = randomNeighbor;
-            if (showInfo) cout << "## " << bestNeighborScore << " < " << solutionScore << " ["<<i<<"]" <<endl;
+            if (showInfo) cout << "## " << randomNeighborScore << " < " << solutionScore << " ["<<i<<"]" <<endl;
         }
     }
     return solution;
@@ -452,7 +453,7 @@ Graph Algoritm_Tabu(Graph graph,
         //cout << "isInTabu = " << isInTabu << ", size = "<< tabu.size() << endl;
         if (bestNeighborScore < solutionScore && !isInTabu) {
             solution = bestNeighbor;
-            if (showInfo) cout << "## " << bestNeighborScore << " < " << solutionScore << " [" << i << "]" << endl;
+            if (showInfo) cout << "## " << bestNeighborScore << " < " << solutionScore << " [" << i << "]" << "[size:" << tabu.size()<<"]" << endl;
         }
 
         tabu.push_back(bestNeighbor);
@@ -463,26 +464,53 @@ Graph Algoritm_Tabu(Graph graph,
     return solution;
 }
 
-Graph Algoritm_SimulatedAnnealing(Graph graph, 
-                                Colorizer colorizer, 
-                                int colorCount, 
-                                int iterations, 
+
+
+Graph Algoritm_SimulatedAnnealing(Graph graph,
+                                Colorizer colorizer,
+                                int colorCount,
+                                int iterations,
+                                int temperature,
                                 bool showInfo) {
     cout << "Simulated Annealing started...\n";
-    int solutionScore, bestNeighborScore;
-    Graph bestNeighbor, solution = colorizer.RandomColorize(graph, colorCount, false);
+    int solutionScore, randomNeighborScore, neighborIndex;
+    Graph randomNeighbor, solution = colorizer.RandomColorize(graph, colorCount, false);
+    Graph bestSolution = solution;
+    random_device rd;
+    mt19937 gen(rd());
+
+    auto temp = [&](double t) {
+        return temperature / t;
+    };
 
     for (int i = 0; i < iterations; i++) {
-        bestNeighbor = GetBestNeighbor(solution);
-        solutionScore = Evaluate(solution, false);
-        bestNeighborScore = Evaluate(bestNeighbor, false);
+        vector<Graph> neighbors = GetNeighbors(solution, false);
+        uniform_int_distribution<> dis(0, neighbors.size() - 1);
+        neighborIndex = dis(gen);
+        randomNeighbor = neighbors[neighborIndex];
 
-        if (bestNeighborScore < solutionScore) {
-            solution = bestNeighbor;
-            if (showInfo) cout << "## " << bestNeighborScore << " < " << solutionScore << " [" << i << "]" << endl;
+        solutionScore = Evaluate(solution, false);
+        randomNeighborScore = Evaluate(randomNeighbor, false);
+
+        if (randomNeighborScore < solutionScore) {
+            solution = randomNeighbor;
+            if (showInfo) cout << "## " << randomNeighborScore << " < " << solutionScore << " [" << i << "] [t:" << temp(i) << "]" << endl;
+        }
+        else {
+            uniform_real_distribution<double> distr(0, 1);
+            auto u = distr(gen);
+            if (u < exp(-abs(Evaluate(solution, false) - Evaluate(randomNeighbor, false)) / temp(i))) {
+                solution = randomNeighbor;
+                //if (showInfo) cout << "### " << Evaluate(randomNeighbor, false) << " < " << Evaluate(solution, false) << " [" << i << "] [" << temp(i + 1) << "]" << endl;
+                //if (showInfo) cout << u << " < " << exp(-abs(Evaluate(solution, false) - Evaluate(randomNeighbor, false) / temp(i))) << endl;
+
+            }
+        }
+        if (solutionScore < Evaluate(bestSolution, false)) {
+            bestSolution = solution;
         }
     }
-    return solution;
+    return bestSolution;
 }
 
 void StartExperiment(string experimentName, 
@@ -491,6 +519,7 @@ void StartExperiment(string experimentName,
                      int maxColorCount, 
                      int iterations,
                      int maxTabuSize,
+                     int temperature,
                      bool showInfo) {
 
     Graph experiment;
@@ -504,7 +533,7 @@ void StartExperiment(string experimentName,
     }else if (experimentName == "Tabu") {
         experiment = Algoritm_Tabu(graph, colorizer, maxColorCount, iterations, maxTabuSize, showInfo);
     }else if (experimentName == "SimulatedAnnealing") {
-        experiment = Algoritm_SimulatedAnnealing(graph, colorizer, maxColorCount, iterations, showInfo);
+        experiment = Algoritm_SimulatedAnnealing(graph, colorizer, maxColorCount, iterations, temperature, showInfo);
     }
     auto calculation_end = chrono::steady_clock::now();
     chrono::duration<double> calculation_duration = calculation_end - calculation_start;
@@ -517,7 +546,7 @@ void StartExperiment(string experimentName,
 }
 
 int main(int argc, char** argv) {
-    vector<int> GraphArgs(7);
+    vector<int> GraphArgs(8);
 
     if (argc > 1) {
         //cout << "argv[1] = " << argv[1] << endl;
@@ -546,8 +575,9 @@ int main(int argc, char** argv) {
         iterations = GraphArgs.at(2), 
         maxColorCount = GraphArgs.at(3),
         maxTabuSize = GraphArgs.at(4),
-        showInfo = GraphArgs.at(5),
-        loadGraphFromFile = GraphArgs.at(6);
+        temperature = GraphArgs.at(5),
+        showInfo = GraphArgs.at(6),
+        loadGraphFromFile = GraphArgs.at(7);
 
     cout << "File arguments: " << endl;
     cout << "VertCount = " << vertCount << endl;
@@ -555,6 +585,7 @@ int main(int argc, char** argv) {
     cout << "Iterations = " << iterations << endl;
     cout << "Max color count = " << maxColorCount << endl;
     cout << "Max Tabu Size = " << maxTabuSize << endl;
+    cout << "Temperature = " << temperature << endl;
     cout << "Show info = " << showInfo << endl;
     cout << "Load graph from file = " << loadGraphFromFile << endl;
 
@@ -577,10 +608,10 @@ int main(int argc, char** argv) {
         graph.PrintStatistics(); // doesn't count isolated vertices and bad edges if vertices loaded from 
     }
 
-    StartExperiment("HillClimbing", graph, colorizer, maxColorCount, iterations, maxTabuSize, showInfo);
-    StartExperiment("HillClimbingRandom", graph, colorizer, maxColorCount, iterations, maxTabuSize, showInfo);
-    StartExperiment("Tabu", graph, colorizer, maxColorCount, iterations, maxTabuSize, showInfo);
-    StartExperiment("SimulatedAnnealing", graph, colorizer, maxColorCount, iterations, maxTabuSize, showInfo);
+    //StartExperiment("HillClimbing", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo);
+    //StartExperiment("HillClimbingRandom", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo);
+    StartExperiment("Tabu", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo);
+    //StartExperiment("SimulatedAnnealing", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo);
 
     cout << "\n";
     return 0;
