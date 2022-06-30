@@ -3,3 +3,15 @@
 400
 3
 100
+1
+1
+
+
+
+1. vertCount
+2. edgeCount
+3. iterations
+4. maxColorCount
+5. maxTabusize
+6. showInfo
+7. loadGraphFromFile
