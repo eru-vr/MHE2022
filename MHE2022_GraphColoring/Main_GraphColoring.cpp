@@ -32,8 +32,6 @@
 
 using namespace std;
 
-
-
 class Graph {
     public:
         class Vert {
@@ -366,7 +364,7 @@ vector<Graph> GetNeighbors(Graph coloredGraph, bool showInfo) {
     return neighbourGraphs;
 }
 
-Graph GetBestNeighbor(Graph solution) {
+Graph GetBestNeighborOf(Graph solution) {
     int bestNeighborScore, currentNeighborScore;
     Graph bestNeighbor = solution;
     vector<Graph> neighbors = GetNeighbors(solution, false);
@@ -383,6 +381,25 @@ Graph GetBestNeighbor(Graph solution) {
     return bestNeighbor;
 }
 
+Graph GetBestNeighborFrom(vector<Graph> neighbors) {
+    int currentNeighborScore, bestNeighborScore;
+    Graph currentNeighbor, bestNeighbor;
+
+    for (int k = 0; k < neighbors.size(); k++) {
+        currentNeighborScore = Evaluate(neighbors[k], false);
+        if (k == 0) bestNeighborScore = currentNeighborScore;
+
+        //cout << "currentNeighborScore = " << currentNeighborScore <<" < " <<" bestNeighborScore  = " << bestNeighborScore << endl;
+        if (currentNeighborScore <= bestNeighborScore) {
+            bestNeighbor = neighbors[k];
+        }
+    }
+    //cout << Evaluate(bestNeighbor, false) <<endl;
+
+    return bestNeighbor;
+}
+
+
 Graph Algoritm_HillClimbing(Graph graph, 
                             Colorizer colorizer, 
                             int colorCount, 
@@ -393,7 +410,7 @@ Graph Algoritm_HillClimbing(Graph graph,
     Graph bestNeighbor, solution = colorizer.RandomColorize(graph, colorCount, false);
 
     for(int i = 0; i < iterations; i++){
-        bestNeighbor = GetBestNeighbor(solution);
+        bestNeighbor = GetBestNeighborOf(solution);
         solutionScore = Evaluate(solution, false);
         bestNeighborScore = Evaluate(bestNeighbor, false);
 
@@ -414,11 +431,11 @@ Graph Algoritm_HillClimbingRandom(Graph graph,
     int solutionScore, randomNeighborScore, neighborIndex;
     Graph randomNeighbor, solution = colorizer.RandomColorize(graph, colorCount, false);
     random_device rd;
-    mt19937 gen(rd());
 
     for(int i = 0; i < iterations; i++){
         vector<Graph> neighbors = GetNeighbors(solution, false);
         uniform_int_distribution<> dis(0, neighbors.size() - 1);
+        mt19937 gen(rd());
         neighborIndex = dis(gen);
         randomNeighbor = neighbors[neighborIndex];
 
@@ -430,7 +447,7 @@ Graph Algoritm_HillClimbingRandom(Graph graph,
         }
     }
     return solution;
-}
+} 
 
 Graph Algoritm_Tabu(Graph graph, 
                     Colorizer colorizer, 
@@ -440,31 +457,33 @@ Graph Algoritm_Tabu(Graph graph,
                     bool showInfo) {
     cout << "Tabu started...\n";
     int solutionScore, bestNeighborScore;
-    bool isInTabu = false;
-    Graph bestNeighbor, solution = colorizer.RandomColorize(graph, colorCount, false);
+    Graph bestNonTabuNeighbor, bestsolution, solution = colorizer.RandomColorize(graph, colorCount, false);
     list<Graph> tabu;
     for (int i = 0; i < iterations; i++) {
-        bestNeighbor = GetBestNeighbor(solution);
-        
-        solutionScore = Evaluate(solution, false);
-        bestNeighborScore = Evaluate(bestNeighbor, false);
-
-        isInTabu = (find(tabu.begin(), tabu.end(), bestNeighbor) != tabu.end());
-        //cout << "isInTabu = " << isInTabu << ", size = "<< tabu.size() << endl;
-        if (bestNeighborScore < solutionScore && !isInTabu) {
-            solution = bestNeighbor;
-            if (showInfo) cout << "## " << bestNeighborScore << " < " << solutionScore << " [" << i << "]" << "[size:" << tabu.size()<<"]" << endl;
+        if (i == 0) bestsolution = solution;
+        //weź sąsiadów
+        //sprawdź czy są jacyś w tabu
+        //weź z listy sąsiadów najlepszego który nie jest w tabu, nieważne czy lepszy od aktualnego score.
+        vector<Graph> nonTabu, neighbors = GetNeighbors(solution, false);
+        for (auto neighbor : neighbors) {
+            if (find(tabu.begin(), tabu.end(), neighbor) == tabu.end()) {
+                nonTabu.push_back(neighbor);
+            }
         }
-
-        tabu.push_back(bestNeighbor);
+        solution = GetBestNeighborFrom(nonTabu);
+        
+        tabu.push_back(solution);
         if (maxTabuSize < tabu.size()) {
             tabu.pop_front();
         }
+
+        if (showInfo) cout << "## " << Evaluate(solution, false) << " [" << i << "]" << "[size:" << tabu.size()<<"]" << endl;
+        if (Evaluate(solution, false) < Evaluate(bestsolution,false)) {
+            bestsolution = solution;
+        }
     }
-    return solution;
+    return bestsolution;
 }
-
-
 
 Graph Algoritm_SimulatedAnnealing(Graph graph,
                                 Colorizer colorizer,
