@@ -464,6 +464,7 @@ Graph Algoritm_Tabu(Graph graph,
         //weź sąsiadów
         //sprawdź czy są jacyś w tabu
         //weź z listy sąsiadów najlepszego który nie jest w tabu, nieważne czy lepszy od aktualnego score.
+        //ale zapisuj najlepszy score
         vector<Graph> nonTabu, neighbors = GetNeighbors(solution, false);
         for (auto neighbor : neighbors) {
             if (find(tabu.begin(), tabu.end(), neighbor) == tabu.end()) {
@@ -567,15 +568,7 @@ void StartExperiment(string experimentName,
 int main(int argc, char** argv) {
     vector<int> GraphArgs(8);
 
-    if (argc > 1) {
-        //cout << "argv[1] = " << argv[1] << endl;
-    }
-    else {
-        cout << "No file name entered.\n\n";
-        return -1;
-    }
-    ifstream infile(argv[1]); //otwiera plik
-
+    ifstream infile("args.txt"); //otwiera plik
     if (infile.is_open() && infile.good()) { //check czy otwarty
         string line = "";
         int i = 0;
@@ -627,10 +620,10 @@ int main(int argc, char** argv) {
         graph.PrintStatistics(); // doesn't count isolated vertices and bad edges if vertices loaded from 
     }
 
-    //StartExperiment("HillClimbing", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo);
-    //StartExperiment("HillClimbingRandom", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo);
+    StartExperiment("HillClimbing", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo);
+    StartExperiment("HillClimbingRandom", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo);
     StartExperiment("Tabu", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo);
-    //StartExperiment("SimulatedAnnealing", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo);
+    StartExperiment("SimulatedAnnealing", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo);
 
     cout << "\n";
     return 0;
