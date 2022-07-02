@@ -270,7 +270,7 @@ vector<Graph::Vert> LoadGraphFromFile(string fname, bool showInfo) {
 
             currentVertex.SetAdjacentVector(adj);
             //GraphArgs.at(i) = stoi(line);
-            vertices.push_back(currentVertex); //add to the end of list
+            vertices.push_back(currentVertex); 
             i++;
         }
         cout << endl;
