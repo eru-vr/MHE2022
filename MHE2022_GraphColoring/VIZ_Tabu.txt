@@ -1,337 +1,435 @@
 graph G {
-0 [ style = filled fillcolor = "#D063C2"] 
-1 [ style = filled fillcolor = "#D063C2"] 
+0 [ style = filled fillcolor = "#397210"] 
+1 [ style = filled fillcolor = "#397210"] 
 2 [ style = filled fillcolor = "#0CE379"] 
-3 [ style = filled fillcolor = "#397210"] 
-4 [ style = filled fillcolor = "#D063C2"] 
-5 [ style = filled fillcolor = "#D063C2"] 
-6 [ style = filled fillcolor = "#0CE379"] 
-7 [ style = filled fillcolor = "#397210"] 
+3 [ style = filled fillcolor = "#0CE379"] 
+4 [ style = filled fillcolor = "#0CE379"] 
+5 [ style = filled fillcolor = "#0CE379"] 
+6 [ style = filled fillcolor = "#D063C2"] 
+7 [ style = filled fillcolor = "#0CE379"] 
 8 [ style = filled fillcolor = "#0CE379"] 
 9 [ style = filled fillcolor = "#0CE379"] 
 10 [ style = filled fillcolor = "#0CE379"] 
-11 [ style = filled fillcolor = "#397210"] 
+11 [ style = filled fillcolor = "#D063C2"] 
 12 [ style = filled fillcolor = "#0CE379"] 
 13 [ style = filled fillcolor = "#D063C2"] 
-14 [ style = filled fillcolor = "#397210"] 
-15 [ style = filled fillcolor = "#0CE379"] 
-16 [ style = filled fillcolor = "#D063C2"] 
-17 [ style = filled fillcolor = "#D063C2"] 
-18 [ style = filled fillcolor = "#0CE379"] 
-19 [ style = filled fillcolor = "#D063C2"] 
+14 [ style = filled fillcolor = "#0CE379"] 
+15 [ style = filled fillcolor = "#397210"] 
+16 [ style = filled fillcolor = "#0CE379"] 
+17 [ style = filled fillcolor = "#0CE379"] 
+18 [ style = filled fillcolor = "#397210"] 
+19 [ style = filled fillcolor = "#397210"] 
 20 [ style = filled fillcolor = "#0CE379"] 
-21 [ style = filled fillcolor = "#D063C2"] 
+21 [ style = filled fillcolor = "#397210"] 
 22 [ style = filled fillcolor = "#397210"] 
-23 [ style = filled fillcolor = "#D063C2"] 
-24 [ style = filled fillcolor = "#D063C2"] 
+23 [ style = filled fillcolor = "#0CE379"] 
+24 [ style = filled fillcolor = "#397210"] 
 25 [ style = filled fillcolor = "#D063C2"] 
-26 [ style = filled fillcolor = "#0CE379"] 
-27 [ style = filled fillcolor = "#0CE379"] 
-28 [ style = filled fillcolor = "#D063C2"] 
+26 [ style = filled fillcolor = "#D063C2"] 
+27 [ style = filled fillcolor = "#D063C2"] 
+28 [ style = filled fillcolor = "#397210"] 
 29 [ style = filled fillcolor = "#397210"] 
-30 [ style = filled fillcolor = "#0CE379"] 
-31 [ style = filled fillcolor = "#D063C2"] 
-32 [ style = filled fillcolor = "#D063C2"] 
+30 [ style = filled fillcolor = "#397210"] 
+31 [ style = filled fillcolor = "#0CE379"] 
+32 [ style = filled fillcolor = "#0CE379"] 
 33 [ style = filled fillcolor = "#D063C2"] 
 34 [ style = filled fillcolor = "#397210"] 
-35 [ style = filled fillcolor = "#0CE379"] 
-36 [ style = filled fillcolor = "#397210"] 
-37 [ style = filled fillcolor = "#0CE379"] 
+35 [ style = filled fillcolor = "#D063C2"] 
+36 [ style = filled fillcolor = "#0CE379"] 
+37 [ style = filled fillcolor = "#397210"] 
 38 [ style = filled fillcolor = "#397210"] 
-39 [ style = filled fillcolor = "#397210"] 
-40 [ style = filled fillcolor = "#D063C2"] 
-41 [ style = filled fillcolor = "#D063C2"] 
-42 [ style = filled fillcolor = "#397210"] 
-43 [ style = filled fillcolor = "#397210"] 
-44 [ style = filled fillcolor = "#0CE379"] 
-45 [ style = filled fillcolor = "#0CE379"] 
+39 [ style = filled fillcolor = "#0CE379"] 
+40 [ style = filled fillcolor = "#397210"] 
+41 [ style = filled fillcolor = "#0CE379"] 
+42 [ style = filled fillcolor = "#D063C2"] 
+43 [ style = filled fillcolor = "#D063C2"] 
+44 [ style = filled fillcolor = "#D063C2"] 
+45 [ style = filled fillcolor = "#D063C2"] 
 46 [ style = filled fillcolor = "#D063C2"] 
 47 [ style = filled fillcolor = "#D063C2"] 
-48 [ style = filled fillcolor = "#0CE379"] 
-49 [ style = filled fillcolor = "#D063C2"] 
-50 [ style = filled fillcolor = "#D063C2"] 
-51 [ style = filled fillcolor = "#397210"] 
+48 [ style = filled fillcolor = "#D063C2"] 
+49 [ style = filled fillcolor = "#0CE379"] 
+50 [ style = filled fillcolor = "#0CE379"] 
+51 [ style = filled fillcolor = "#D063C2"] 
 52 [ style = filled fillcolor = "#D063C2"] 
-53 [ style = filled fillcolor = "#0CE379"] 
-54 [ style = filled fillcolor = "#D063C2"] 
-55 [ style = filled fillcolor = "#0CE379"] 
-56 [ style = filled fillcolor = "#0CE379"] 
+53 [ style = filled fillcolor = "#D063C2"] 
+54 [ style = filled fillcolor = "#397210"] 
+55 [ style = filled fillcolor = "#397210"] 
+56 [ style = filled fillcolor = "#397210"] 
 57 [ style = filled fillcolor = "#397210"] 
 58 [ style = filled fillcolor = "#0CE379"] 
-59 [ style = filled fillcolor = "#397210"] 
+59 [ style = filled fillcolor = "#D063C2"] 
 60 [ style = filled fillcolor = "#397210"] 
-61 [ style = filled fillcolor = "#397210"] 
-62 [ style = filled fillcolor = "#D063C2"] 
+61 [ style = filled fillcolor = "#D063C2"] 
+62 [ style = filled fillcolor = "#0CE379"] 
 63 [ style = filled fillcolor = "#397210"] 
-64 [ style = filled fillcolor = "#0CE379"] 
-65 [ style = filled fillcolor = "#D063C2"] 
-66 [ style = filled fillcolor = "#D063C2"] 
-67 [ style = filled fillcolor = "#0CE379"] 
+64 [ style = filled fillcolor = "#397210"] 
+65 [ style = filled fillcolor = "#397210"] 
+66 [ style = filled fillcolor = "#0CE379"] 
+67 [ style = filled fillcolor = "#397210"] 
 68 [ style = filled fillcolor = "#D063C2"] 
-69 [ style = filled fillcolor = "#397210"] 
-70 [ style = filled fillcolor = "#397210"] 
-71 [ style = filled fillcolor = "#D063C2"] 
-72 [ style = filled fillcolor = "#D063C2"] 
-73 [ style = filled fillcolor = "#397210"] 
+69 [ style = filled fillcolor = "#D063C2"] 
+70 [ style = filled fillcolor = "#0CE379"] 
+71 [ style = filled fillcolor = "#397210"] 
+72 [ style = filled fillcolor = "#0CE379"] 
+73 [ style = filled fillcolor = "#0CE379"] 
 74 [ style = filled fillcolor = "#D063C2"] 
-75 [ style = filled fillcolor = "#D063C2"] 
+75 [ style = filled fillcolor = "#397210"] 
 76 [ style = filled fillcolor = "#D063C2"] 
-77 [ style = filled fillcolor = "#0CE379"] 
-78 [ style = filled fillcolor = "#0CE379"] 
+77 [ style = filled fillcolor = "#D063C2"] 
+78 [ style = filled fillcolor = "#397210"] 
 79 [ style = filled fillcolor = "#0CE379"] 
 80 [ style = filled fillcolor = "#397210"] 
-81 [ style = filled fillcolor = "#0CE379"] 
-82 [ style = filled fillcolor = "#0CE379"] 
+81 [ style = filled fillcolor = "#397210"] 
+82 [ style = filled fillcolor = "#D063C2"] 
 83 [ style = filled fillcolor = "#397210"] 
-84 [ style = filled fillcolor = "#397210"] 
+84 [ style = filled fillcolor = "#0CE379"] 
 85 [ style = filled fillcolor = "#397210"] 
 86 [ style = filled fillcolor = "#0CE379"] 
-87 [ style = filled fillcolor = "#397210"] 
-88 [ style = filled fillcolor = "#D063C2"] 
+87 [ style = filled fillcolor = "#D063C2"] 
+88 [ style = filled fillcolor = "#397210"] 
 89 [ style = filled fillcolor = "#397210"] 
 90 [ style = filled fillcolor = "#0CE379"] 
-91 [ style = filled fillcolor = "#0CE379"] 
-92 [ style = filled fillcolor = "#D063C2"] 
-93 [ style = filled fillcolor = "#0CE379"] 
-94 [ style = filled fillcolor = "#0CE379"] 
+91 [ style = filled fillcolor = "#397210"] 
+92 [ style = filled fillcolor = "#0CE379"] 
+93 [ style = filled fillcolor = "#397210"] 
+94 [ style = filled fillcolor = "#397210"] 
 95 [ style = filled fillcolor = "#D063C2"] 
-96 [ style = filled fillcolor = "#D063C2"] 
-97 [ style = filled fillcolor = "#D063C2"] 
-98 [ style = filled fillcolor = "#397210"] 
+96 [ style = filled fillcolor = "#397210"] 
+97 [ style = filled fillcolor = "#0CE379"] 
+98 [ style = filled fillcolor = "#D063C2"] 
 99 [ style = filled fillcolor = "#0CE379"] 
-0 -- 2
-1 -- 57
-2 -- 0
-3 -- 90
-3 -- 35
-3 -- 41
-3 -- 87
-5 -- 91
-5 -- 81
-5 -- 14
-5 -- 9
-5 -- 15
-6 -- 35
-6 -- 24
-6 -- 59
-7 -- 26
-8 -- 22
-8 -- 41
-9 -- 62
-9 -- 5
-10 -- 41
-10 -- 95
-11 -- 94
-11 -- 82
+100 [ style = filled fillcolor = "#0CE379"] 
+101 [ style = filled fillcolor = "#D063C2"] 
+102 [ style = filled fillcolor = "#D063C2"] 
+103 [ style = filled fillcolor = "#0CE379"] 
+104 [ style = filled fillcolor = "#397210"] 
+105 [ style = filled fillcolor = "#397210"] 
+106 [ style = filled fillcolor = "#397210"] 
+107 [ style = filled fillcolor = "#D063C2"] 
+108 [ style = filled fillcolor = "#D063C2"] 
+109 [ style = filled fillcolor = "#D063C2"] 
+110 [ style = filled fillcolor = "#397210"] 
+111 [ style = filled fillcolor = "#D063C2"] 
+112 [ style = filled fillcolor = "#D063C2"] 
+113 [ style = filled fillcolor = "#0CE379"] 
+114 [ style = filled fillcolor = "#397210"] 
+115 [ style = filled fillcolor = "#0CE379"] 
+116 [ style = filled fillcolor = "#D063C2"] 
+117 [ style = filled fillcolor = "#397210"] 
+118 [ style = filled fillcolor = "#397210"] 
+119 [ style = filled fillcolor = "#0CE379"] 
+120 [ style = filled fillcolor = "#0CE379"] 
+121 [ style = filled fillcolor = "#D063C2"] 
+122 [ style = filled fillcolor = "#397210"] 
+123 [ style = filled fillcolor = "#0CE379"] 
+124 [ style = filled fillcolor = "#0CE379"] 
+125 [ style = filled fillcolor = "#397210"] 
+126 [ style = filled fillcolor = "#397210"] 
+127 [ style = filled fillcolor = "#397210"] 
+128 [ style = filled fillcolor = "#D063C2"] 
+129 [ style = filled fillcolor = "#D063C2"] 
+130 [ style = filled fillcolor = "#0CE379"] 
+131 [ style = filled fillcolor = "#0CE379"] 
+132 [ style = filled fillcolor = "#0CE379"] 
+133 [ style = filled fillcolor = "#D063C2"] 
+134 [ style = filled fillcolor = "#0CE379"] 
+135 [ style = filled fillcolor = "#D063C2"] 
+136 [ style = filled fillcolor = "#0CE379"] 
+137 [ style = filled fillcolor = "#0CE379"] 
+138 [ style = filled fillcolor = "#0CE379"] 
+139 [ style = filled fillcolor = "#D063C2"] 
+0 -- 31
+1 -- 16
+2 -- 118
+3 -- 56
+4 -- 28
+5 -- 83
+6 -- 70
+6 -- 104
+6 -- 20
+8 -- 34
+8 -- 108
+9 -- 70
+10 -- 70
+10 -- 125
+10 -- 133
+10 -- 74
 12 -- 70
-12 -- 73
-13 -- 86
-14 -- 95
-14 -- 77
-14 -- 5
-14 -- 20
-15 -- 45
-15 -- 24
-15 -- 5
-15 -- 29
-16 -- 60
-17 -- 38
-17 -- 45
-19 -- 37
-20 -- 33
-20 -- 14
-20 -- 25
-20 -- 83
-21 -- 98
-21 -- 58
-22 -- 45
-22 -- 8
-23 -- 73
-23 -- 84
-23 -- 59
-24 -- 55
-24 -- 26
-24 -- 15
-24 -- 39
-24 -- 95
-24 -- 83
-24 -- 6
-25 -- 55
-25 -- 99
-25 -- 20
-25 -- 37
-26 -- 7
-26 -- 24
-26 -- 36
-26 -- 34
-27 -- 71
-27 -- 51
-28 -- 99
-28 -- 59
-29 -- 62
-29 -- 15
-30 -- 87
-31 -- 77
-31 -- 43
-31 -- 36
-32 -- 69
-33 -- 20
-33 -- 60
-34 -- 72
-34 -- 26
-35 -- 6
-35 -- 38
-35 -- 3
-35 -- 96
-36 -- 26
-36 -- 93
-36 -- 31
-37 -- 98
-37 -- 19
-37 -- 49
-37 -- 80
-37 -- 25
-38 -- 35
-38 -- 17
-38 -- 53
-39 -- 52
-39 -- 24
-39 -- 64
-39 -- 95
-40 -- 51
-41 -- 10
-41 -- 80
-41 -- 8
-41 -- 3
-42 -- 62
-42 -- 77
-43 -- 31
-43 -- 46
-43 -- 53
-44 -- 71
-44 -- 97
-45 -- 22
-45 -- 15
-45 -- 17
-46 -- 77
-46 -- 43
-47 -- 98
-48 -- 83
-49 -- 37
-50 -- 77
-50 -- 90
-51 -- 76
-51 -- 40
-51 -- 27
-52 -- 39
-52 -- 87
-53 -- 54
-53 -- 43
-53 -- 38
-53 -- 84
-53 -- 65
-54 -- 83
-54 -- 53
-54 -- 90
-55 -- 24
-55 -- 73
-55 -- 25
-56 -- 62
-57 -- 81
-57 -- 77
-57 -- 1
-58 -- 21
-59 -- 6
-59 -- 23
-59 -- 28
-60 -- 16
-60 -- 65
-60 -- 71
-60 -- 33
-61 -- 78
-61 -- 76
-62 -- 42
-62 -- 29
-62 -- 9
-62 -- 56
-64 -- 65
-64 -- 39
-64 -- 96
-65 -- 60
-65 -- 64
-65 -- 53
-68 -- 98
-68 -- 79
-69 -- 32
+12 -- 30
+12 -- 134
+13 -- 88
+16 -- 1
+17 -- 114
+17 -- 47
+17 -- 98
+17 -- 96
+17 -- 107
+18 -- 47
+18 -- 74
+18 -- 48
+18 -- 43
+19 -- 53
+20 -- 115
+20 -- 125
+20 -- 104
+20 -- 127
+20 -- 57
+20 -- 6
+21 -- 136
+21 -- 97
+22 -- 68
+23 -- 122
+24 -- 49
+25 -- 122
+25 -- 73
+26 -- 65
+26 -- 122
+28 -- 4
+28 -- 122
+28 -- 108
+29 -- 103
+29 -- 74
+29 -- 32
+29 -- 97
+29 -- 36
+30 -- 12
+30 -- 83
+31 -- 0
+32 -- 29
+32 -- 116
+33 -- 131
+33 -- 80
+34 -- 8
+34 -- 53
+34 -- 42
+35 -- 118
+36 -- 47
+36 -- 29
+37 -- 128
+38 -- 43
+38 -- 82
+38 -- 123
+39 -- 129
+39 -- 85
+40 -- 96
+40 -- 72
+41 -- 125
+41 -- 135
+41 -- 122
+42 -- 117
+42 -- 49
+42 -- 127
+42 -- 131
+42 -- 34
+42 -- 60
+43 -- 38
+43 -- 70
+43 -- 18
+44 -- 100
+45 -- 120
+46 -- 58
+46 -- 110
+47 -- 36
+47 -- 17
+47 -- 18
+48 -- 49
+48 -- 18
+48 -- 60
+49 -- 60
+49 -- 24
+49 -- 42
+49 -- 95
+49 -- 48
+50 -- 80
+51 -- 89
+51 -- 90
+51 -- 84
+52 -- 113
+52 -- 88
+52 -- 132
+53 -- 19
+53 -- 34
+56 -- 3
+56 -- 123
+56 -- 68
+57 -- 89
+57 -- 20
+58 -- 46
+58 -- 82
+60 -- 135
+60 -- 49
+60 -- 48
+60 -- 42
+61 -- 110
+61 -- 130
+61 -- 116
+63 -- 132
+63 -- 74
+64 -- 124
+64 -- 101
+65 -- 66
+65 -- 102
+65 -- 26
+65 -- 80
+66 -- 65
+67 -- 69
+68 -- 93
+68 -- 22
+68 -- 138
+68 -- 56
+69 -- 132
+69 -- 67
+70 -- 81
+70 -- 10
+70 -- 9
+70 -- 6
 70 -- 12
-71 -- 27
-71 -- 60
-71 -- 44
-72 -- 34
-73 -- 55
-73 -- 23
-73 -- 12
-73 -- 96
-74 -- 94
-75 -- 89
-76 -- 51
-76 -- 61
-77 -- 50
-77 -- 87
-77 -- 46
-77 -- 31
-77 -- 42
-77 -- 57
-77 -- 14
-77 -- 80
-78 -- 61
-78 -- 89
-79 -- 85
-79 -- 68
-80 -- 37
-80 -- 41
-80 -- 77
-81 -- 57
-81 -- 5
-82 -- 11
-83 -- 54
-83 -- 24
-83 -- 48
-83 -- 20
-84 -- 23
-84 -- 53
-85 -- 79
-86 -- 13
-87 -- 99
-87 -- 77
-87 -- 30
-87 -- 52
-87 -- 3
-89 -- 75
-89 -- 78
-90 -- 3
-90 -- 54
-90 -- 50
-91 -- 5
-93 -- 36
-94 -- 11
-94 -- 74
-95 -- 24
-95 -- 14
-95 -- 10
-95 -- 39
-96 -- 35
-96 -- 64
-96 -- 73
-97 -- 98
-97 -- 44
-98 -- 37
-98 -- 21
-98 -- 47
-98 -- 68
-98 -- 97
-99 -- 87
-99 -- 28
-99 -- 25
+70 -- 127
+70 -- 43
+72 -- 132
+72 -- 40
+72 -- 125
+73 -- 25
+74 -- 29
+74 -- 113
+74 -- 10
+74 -- 18
+74 -- 63
+75 -- 77
+75 -- 92
+76 -- 119
+77 -- 92
+77 -- 75
+78 -- 100
+78 -- 87
+79 -- 117
+80 -- 50
+80 -- 33
+80 -- 65
+81 -- 70
+82 -- 38
+82 -- 90
+82 -- 58
+83 -- 5
+83 -- 30
+84 -- 51
+85 -- 121
+85 -- 115
+85 -- 39
+85 -- 119
+85 -- 120
+86 -- 111
+87 -- 110
+87 -- 78
+88 -- 138
+88 -- 13
+88 -- 52
+89 -- 51
+89 -- 113
+89 -- 57
+90 -- 110
+90 -- 82
+90 -- 105
+90 -- 51
+91 -- 108
+92 -- 77
+92 -- 126
+92 -- 75
+93 -- 68
+95 -- 49
+95 -- 106
+96 -- 40
+96 -- 17
+97 -- 29
+97 -- 21
+98 -- 17
+100 -- 78
+100 -- 44
+101 -- 64
+102 -- 65
+103 -- 29
+104 -- 20
+104 -- 6
+105 -- 90
+106 -- 95
+107 -- 17
+108 -- 28
+108 -- 8
+108 -- 91
+108 -- 131
+109 -- 127
+110 -- 61
+110 -- 90
+110 -- 46
+110 -- 87
+111 -- 86
+112 -- 127
+112 -- 130
+113 -- 89
+113 -- 74
+113 -- 52
+114 -- 17
+115 -- 20
+115 -- 85
+116 -- 61
+116 -- 32
+117 -- 79
+117 -- 42
+118 -- 2
+118 -- 35
+119 -- 76
+119 -- 85
+120 -- 45
+120 -- 85
+121 -- 85
+122 -- 23
+122 -- 28
+122 -- 25
+122 -- 41
+122 -- 26
+123 -- 38
+123 -- 56
+124 -- 64
+124 -- 139
+125 -- 10
+125 -- 129
+125 -- 41
+125 -- 20
+125 -- 136
+125 -- 132
+125 -- 72
+126 -- 92
+127 -- 109
+127 -- 112
+127 -- 42
+127 -- 20
+127 -- 70
+128 -- 37
+129 -- 39
+129 -- 125
+129 -- 137
+130 -- 61
+130 -- 139
+130 -- 112
+131 -- 33
+131 -- 42
+131 -- 108
+132 -- 69
+132 -- 63
+132 -- 72
+132 -- 125
+132 -- 52
+133 -- 10
+134 -- 12
+135 -- 60
+135 -- 41
+136 -- 21
+136 -- 125
+137 -- 129
+138 -- 88
+138 -- 68
+139 -- 130
+139 -- 124
 }
 // colorCount = 3

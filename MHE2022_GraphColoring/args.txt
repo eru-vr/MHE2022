@@ -1,18 +1,21 @@
-90
-100
-700
+140
+150
+750
+10
 3
-20
+5
 100
-1
+0
 1
 
 
+ARGS INFO:
 1. vertCount
 2. edgeCount
 3. iterations
-4. maxColorCount
-5. maxTabusize
-6. temperature
-7. showInfo
-8. loadGraphFromFile
+4. experimentIterations
+5. maxColorCount
+6. maxTabusize
+7. temperature
+8. showInfo
+9. loadGraphFromFile

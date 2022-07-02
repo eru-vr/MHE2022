@@ -29,6 +29,7 @@
 #include <random>
 #include <chrono>
 #include <cmath>
+#include <iterator>
 
 using namespace std;
 
@@ -173,6 +174,10 @@ class Graph {
             vertices = vertVector;
             edgeCount = edgecount;
             vertCount = vertVector.size();
+            isolatedCount = 0;
+            coloredVertCount = 0;
+            badEdgesCount = 0;
+            colorCount = 0;
         }
         Graph(vector<Vert> vertVector) { // Graph from file
             vertices = vertVector;
@@ -418,6 +423,9 @@ Graph Algoritm_HillClimbing(Graph graph,
             solution = bestNeighbor;
             if (showInfo) cout << "## " << bestNeighborScore << " < " << solutionScore << " [" << i << "]" << endl;
         }
+        if (bestNeighborScore == 0) {
+            return solution;
+        }
     }
     return solution;
 }
@@ -444,6 +452,9 @@ Graph Algoritm_HillClimbingRandom(Graph graph,
         if (randomNeighborScore < solutionScore) {
             solution = randomNeighbor;
             if (showInfo) cout << "## " << randomNeighborScore << " < " << solutionScore << " ["<<i<<"]" <<endl;
+        }
+        if (randomNeighborScore == 0) {
+            return solution;
         }
     }
     return solution;
@@ -478,9 +489,13 @@ Graph Algoritm_Tabu(Graph graph,
             tabu.pop_front();
         }
 
-        if (showInfo) cout << "## " << Evaluate(solution, false) << " [" << i << "]" << "[size:" << tabu.size()<<"]" << endl;
         if (Evaluate(solution, false) < Evaluate(bestsolution,false)) {
             bestsolution = solution;
+            if (showInfo) cout << "## " << Evaluate(solution, false) << " [" << i << "]" << "[size:" << tabu.size() << "]" << endl;
+
+        }
+        if (Evaluate(solution, false) == 0) {
+            return solution;
         }
     }
     return bestsolution;
@@ -523,17 +538,19 @@ Graph Algoritm_SimulatedAnnealing(Graph graph,
                 solution = randomNeighbor;
                 //if (showInfo) cout << "### " << Evaluate(randomNeighbor, false) << " < " << Evaluate(solution, false) << " [" << i << "] [" << temp(i + 1) << "]" << endl;
                 //if (showInfo) cout << u << " < " << exp(-abs(Evaluate(solution, false) - Evaluate(randomNeighbor, false) / temp(i))) << endl;
-
             }
         }
         if (solutionScore < Evaluate(bestSolution, false)) {
+            bestSolution = solution;
+        }
+        if (solutionScore == 0) {
             bestSolution = solution;
         }
     }
     return bestSolution;
 }
 
-void StartExperiment(string experimentName, 
+Graph StartExperiment(string experimentName, 
                      Graph graph, 
                      Colorizer colorizer, 
                      int maxColorCount, 
@@ -563,10 +580,11 @@ void StartExperiment(string experimentName,
     fname = "VIZ_" + experimentName + ".txt";
     GraphVizToFile(experiment, fname);
     cout << endl;
+    return experiment;
 }
 
 int main(int argc, char** argv) {
-    vector<int> GraphArgs(8);
+    vector<int> GraphArgs(9);
 
     ifstream infile("args.txt"); //otwiera plik
     if (infile.is_open() && infile.good()) { //check czy otwarty
@@ -585,16 +603,18 @@ int main(int argc, char** argv) {
     int vertCount = GraphArgs.at(0),
         edgeCount = GraphArgs.at(1), 
         iterations = GraphArgs.at(2), 
-        maxColorCount = GraphArgs.at(3),
-        maxTabuSize = GraphArgs.at(4),
-        temperature = GraphArgs.at(5),
-        showInfo = GraphArgs.at(6),
-        loadGraphFromFile = GraphArgs.at(7);
+        experimentIterations = GraphArgs.at(3),
+        maxColorCount = GraphArgs.at(4),
+        maxTabuSize = GraphArgs.at(5),
+        temperature = GraphArgs.at(6),
+        showInfo = GraphArgs.at(7),
+        loadGraphFromFile = GraphArgs.at(8);
 
     cout << "File arguments: " << endl;
     cout << "VertCount = " << vertCount << endl;
     cout << "EdgeCount = " << edgeCount << endl;
     cout << "Iterations = " << iterations << endl;
+    cout << "experimentIterations = " << experimentIterations << endl;
     cout << "Max color count = " << maxColorCount << endl;
     cout << "Max Tabu Size = " << maxTabuSize << endl;
     cout << "Temperature = " << temperature << endl;
@@ -605,6 +625,8 @@ int main(int argc, char** argv) {
 
     Graph graph;
     Colorizer colorizer;
+    int currentExperiment;
+    vector<int> experimentScores;
 
     if (loadGraphFromFile) {
         graph = Graph(LoadGraphFromFile("myGraph.txt", false));
@@ -613,17 +635,59 @@ int main(int argc, char** argv) {
         graph = Graph(GenerateVertices(vertCount), edgeCount);
         graph.GenerateGraph();
         SaveGraphToFile(graph);
-    }
-    if(showInfo){
-        graph.PrintVertList();
-        cout << endl;
-        graph.PrintStatistics(); // doesn't count isolated vertices and bad edges if vertices loaded from 
+        if (showInfo) {
+            graph.PrintVertList();
+            cout << endl;
+            graph.PrintStatistics();
+        }
+        return 0;
     }
 
-    StartExperiment("HillClimbing", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo);
-    StartExperiment("HillClimbingRandom", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo);
-    StartExperiment("Tabu", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo);
-    StartExperiment("SimulatedAnnealing", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo);
+    for(int i=0;i< experimentIterations;i++){
+        currentExperiment = Evaluate(StartExperiment("HillClimbing", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo), false);
+        if (i == 0) experimentScores.push_back(currentExperiment);
+        if (currentExperiment < experimentScores[0]) {
+            experimentScores[0] = currentExperiment;
+        }
+    }
+    for (int i = 0; i < experimentIterations; i++) {
+        currentExperiment = Evaluate(StartExperiment("HillClimbingRandom", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo), false);
+        if (i == 0) experimentScores.push_back(currentExperiment);
+        if (currentExperiment < experimentScores[1]) {
+            experimentScores[1] = currentExperiment;
+        }
+    }
+    for (int i = 0; i < experimentIterations; i++) {
+        currentExperiment = Evaluate(StartExperiment("Tabu", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo), false);
+        if (i == 0) experimentScores.push_back(currentExperiment);
+        if (currentExperiment < experimentScores[2]) {
+            experimentScores[2] = currentExperiment;
+        }
+    }
+    for (int i = 0; i < experimentIterations; i++) {
+        currentExperiment = Evaluate(StartExperiment("SimulatedAnnealing", graph, colorizer, maxColorCount, iterations, maxTabuSize, temperature, showInfo), false);
+        if (i == 0) experimentScores.push_back(currentExperiment);
+        if (currentExperiment < experimentScores[3]) {
+            experimentScores[3] = currentExperiment;
+        }
+    }
+
+    cout << "Iterations = " << iterations << endl;
+    cout << "Iterations per experiment = " << experimentIterations << endl;
+    int bestIdx = min_element(experimentScores.begin(), experimentScores.end()) - experimentScores.begin();
+    cout << "Least erros across all experiments = [" << experimentScores[bestIdx] << "]";
+    if (bestIdx == 0) {
+        cout << " - HillClimbing won";
+    }
+    else if (bestIdx == 1) {
+        cout << " - HillClimbing Random won";
+    }
+    else if (bestIdx == 2) {
+        cout << " - Tabu won";
+    }
+    else if (bestIdx == 3) {
+        cout << " - Simulated Annealing won";
+    }
 
     cout << "\n";
     return 0;
